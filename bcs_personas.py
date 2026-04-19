@@ -1,199 +1,588 @@
 """
-BCS-E Breast Cancer Screening — 51 Realistic Persona Builder
-
-Replaces old 48-persona model (is_excluded boolean) with 51 clinically valid
-personas based on HEDIS BCS-E guidelines:
-
-  NOT_ELIGIBLE:       3  (gender / age / enrollment)
-  COMPLIANT/OPEN_GAP: 12 (3 GC × 2 age bands × 2 mammogram)
-  EXCLUDED 42-65:     15 (3 GC × 5 exclusions — no frailty/SNP for <66)
-  EXCLUDED 66-74:     21 (3 GC × 7 exclusions)
-  Total:              51
+BCS Ideal Personas — 51 Persona Library
+Hopkins BCS-E | 9-Node Structure Per Persona
 """
 
-import os, json
-from dotenv import load_dotenv
-from neo4j import GraphDatabase
+def p(pid, name, group, age_pass, lookback, snp_ltc, enrolled, enr_gap,
+      scr_status, months, mammo_type, cpt_valid, claim_type, in_window,
+      brca, fam_hx, dense, hrt, bmi, biopsy, menarche, preg30, no_bf, sed, alc,
+      has_comorbid, comorbid_types, mental_health,
+      bil_mast, hospice, palliative, frailty, gender_surg, any_excl,
+      eng_level, barrier, contact, transport,
+      gap_status, priority, reason, risk_cat, screen_type, actions, channel, escalation, days):
+    return {
+        "persona": {"personaID": pid, "personaName": name, "group": group},
+        "age_rule": {"eligibilityAgeCheck": age_pass, "lookbackAgeCheck": lookback, "medicare66PlusInSNP_LTC": snp_ltc},
+        "enrollment": {"continuouslyEnrolled": enrolled, "enrollmentGapPresent": enr_gap},
+        "screening": {"screeningStatus": scr_status, "monthsSinceLastScreen": months, "lastMammogramType": mammo_type, "cptValid": cpt_valid, "claimType": claim_type, "fallsInLookbackWindow": in_window},
+        "risk": {"brcaStatus": brca, "familyHistory": fam_hx, "denseBreast": dense, "hrtUse": hrt, "bmi": bmi, "priorBiopsy": biopsy, "earlyMenarche": menarche, "firstPregnancyAfter30": preg30, "noBreastfeeding": no_bf, "sedentary": sed, "alcoholUse": alc},
+        "comorbidity": {"hasComorbidities": has_comorbid, "comorbidityTypes": comorbid_types, "mentalHealthCondition": mental_health},
+        "exclusion": {"bilateralMastectomy": bil_mast, "hospice": hospice, "palliativeCare": palliative, "frailty": frailty, "genderAffirmingSurgery": gender_surg, "anyExclusionPresent": any_excl},
+        "engagement": {"engagementLevel": eng_level, "knownBarrier": barrier, "preferredContact": contact, "transportationAccess": transport},
+        "output": {"gapStatus": gap_status, "priorityLevel": priority, "priorityReason": reason, "riskCategory": risk_cat, "recommendedScreeningType": screen_type, "recommendedActions": actions, "outreachChannel": channel, "escalationPath": escalation, "followUpDays": days}
+    }
 
-load_dotenv()
+PERSONAS = [
+# ── GROUP 1: EXCLUDED ──────────────────────────────────────────────────────
+p("P-001","Bilateral Mastectomy — Excluded","Excluded",
+  "PASS","N/A",False, True,False,
+  "N/A","N/A","N/A","N/A","N/A","N/A",
+  "Any","Any","N/A","Any","Any","Any","Any","Any","Any","Any","Any",
+  "Any","Any","Any",
+  True,False,False,False,False,True,
+  "N/A","N/A","N/A","N/A",
+  "EXCLUDED","N/A","Bilateral Mastectomy on record","N/A","NONE",
+  ["Remove from BCS measure","Document Z90.13"],"None","None","N/A"),
 
-URI      = os.getenv("NEO4J_URI")
-USER     = os.getenv("NEO4J_USERNAME")
-PASSWORD = os.getenv("NEO4J_PASSWORD")
-DB       = os.getenv("NEO4J_DATABASE")
+p("P-002","Hospice or Palliative Care — Excluded","Excluded",
+  "PASS","N/A",False, True,False,
+  "N/A","N/A","N/A","N/A","N/A","N/A",
+  "Any","Any","Any","Any","Any","Any","Any","Any","Any","Any","Any",
+  True,"Terminal illness","Any",
+  False,True,True,False,False,True,
+  "N/A","N/A","N/A","N/A",
+  "EXCLUDED","N/A","Hospice/Palliative Care in measurement year","N/A","NONE",
+  ["Remove from BCS measure","Document hospice enrollment"],"None","None","N/A"),
 
-GENDER_CRITERIA = [
-    {"code": "GC1", "label": "AdministrativeGender=Female",
-     "description": "Administrative Gender of Female at any time in member history"},
-    {"code": "GC2", "label": "SexAssignedAtBirth=Female",
-     "description": "Sex Assigned at Birth (LOINC 76689-9) of Female (LOINC LA3-6) at any time in member history"},
-    {"code": "GC3", "label": "SexParamClinicalUse=Female",
-     "description": "Sex Parameter for Clinical Use of Female (female-typical) during measurement period"},
+p("P-003","Frailty and Advanced Illness — Excluded","Excluded",
+  "PASS","N/A",False, True,False,
+  "N/A","N/A","N/A","N/A","N/A","N/A",
+  "Any","Any","Any","Any","Any","Any","Any","Any","Any","Any","Any",
+  True,"Advanced illness","Any",
+  False,False,False,True,False,True,
+  "N/A","N/A","N/A","N/A",
+  "EXCLUDED","N/A","Frailty + Advanced Illness documented","N/A","NONE",
+  ["Remove from BCS measure","Document frailty exclusion"],"None","None","N/A"),
+
+p("P-004","Gender-Affirming Chest Surgery with Gender Dysphoria — Excluded","Excluded",
+  "PASS","N/A",False, True,False,
+  "N/A","N/A","N/A","N/A","N/A","N/A",
+  "N/A","N/A","N/A","N/A","N/A","N/A","N/A","N/A","N/A","N/A","N/A",
+  "Any","Any","Any",
+  False,False,False,False,True,True,
+  "N/A","N/A","N/A","N/A",
+  "EXCLUDED","N/A","Gender-affirming chest surgery with gender dysphoria diagnosis","N/A","NONE",
+  ["Remove from BCS measure","Document CPT 19318 + F64.x"],"None","None","N/A"),
+
+p("P-005","Medicare 66+ in I-SNP or LTC — Excluded","Excluded",
+  "PASS","N/A",True, True,False,
+  "N/A","N/A","N/A","N/A","N/A","N/A",
+  "Any","Any","Any","Any","Any","Any","Any","Any","Any","Any","Any",
+  True,"Multiple","Any",
+  False,False,False,"Any",False,True,
+  "N/A","N/A","N/A","N/A",
+  "EXCLUDED","N/A","Medicare member 66+ enrolled in I-SNP or LTC","N/A","NONE",
+  ["Remove from BCS measure","Document institutional enrollment"],"None","None","N/A"),
+
+# ── GROUP 2: NOT ELIGIBLE ──────────────────────────────────────────────────
+p("P-006","Age Below 42 — Not Eligible for BCS","Not Eligible",
+  "FAIL","N/A",False, True,False,
+  "N/A","N/A","N/A","N/A","N/A","N/A",
+  "Any","Any","Any","Any","Any","Any","Any","Any","Any","Any","Any",
+  "Any","Any","Any",
+  False,False,False,False,False,False,
+  "Any","Any","Any","Any",
+  "NOT ELIGIBLE","N/A","Age below 42 as of Dec 31 measurement year","N/A","N/A",
+  ["Monitor — re-evaluate at age 42"],"None","None","N/A"),
+
+p("P-007","Age Above 74 — Not Eligible for BCS","Not Eligible",
+  "FAIL","N/A",False, True,False,
+  "N/A","N/A","N/A","N/A","N/A","N/A",
+  "Any","Any","Any","Any","Any","Any","Any","Any","Any","Any","Any",
+  "Any","Any","Any",
+  False,False,False,False,False,False,
+  "Any","Any","Any","Any",
+  "NOT ELIGIBLE","N/A","Age above 74 as of Dec 31 measurement year","N/A","N/A",
+  ["Aged out of BCS measure"],"None","None","N/A"),
+
+p("P-008","Enrollment Gap — Not Continuously Enrolled","Not Eligible",
+  "PASS","Any",False, False,True,
+  "Any","Any","Any","Any","Any","Any",
+  "Any","Any","Any","Any","Any","Any","Any","Any","Any","Any","Any",
+  "Any","Any","Any",
+  False,False,False,False,False,False,
+  "Any","Any","Any","Any",
+  "NOT ELIGIBLE","N/A","Enrollment gap during measurement period","N/A","N/A",
+  ["Re-evaluate once continuous enrollment confirmed"],"None","None","N/A"),
+
+# ── GROUP 3: NEVER SCREENED ────────────────────────────────────────────────
+p("P-009","Never Screened — Very High Risk — BRCA+ with Family History","Never Screened",
+  "PASS","FAIL",False, True,False,
+  "Never Screened","Never","None",False,"None",False,
+  "Positive",True,"Yes (D)",True,"Obese (BMI>30)","Atypical Hyperplasia",True,True,True,True,True,
+  True,"Diabetes + Hypertension","Anxiety",
+  False,False,False,False,False,False,
+  "Low","Fear of results","Phone",True,
+  "OPEN","VERY HIGH","Never screened + BRCA+ + Family history + Dense breast + HRT","Very High","MRI + 3D Mammogram",
+  ["Urgent phone outreach","Refer for BRCA genetic counseling","Alert PCP + OB-GYN immediately","Schedule MRI + 3D mammogram","Address fear barrier via care manager","Follow up in 7 days"],
+  "Phone (urgent)","Care Manager → PCP → OB-GYN → Oncologist",7),
+
+p("P-010","Never Screened — High Risk — HRT with Dense Breast","Never Screened",
+  "PASS","FAIL",False, True,False,
+  "Never Screened","Never","None",False,"None",False,
+  "Untested",True,"Yes (C)",True,"Overweight",False,True,False,True,True,"Occasional",
+  True,"Hypertension",False,
+  False,False,False,False,False,False,
+  "Medium","No time","SMS",True,
+  "OPEN","HIGH","Never screened + HRT + Dense breast + Family history","High","3D Mammogram (DBT)",
+  ["SMS outreach","Refer for BRCA testing","Alert PCP to issue 3D mammogram referral","Follow up in 14 days"],
+  "SMS","Care Manager → PCP",14),
+
+p("P-011","Never Screened — Medium Risk — Obese Sedentary","Never Screened",
+  "PASS","FAIL",False, True,False,
+  "Never Screened","Never","None",False,"None",False,
+  "Negative",False,False,False,"Obese (BMI>30)",False,False,False,True,True,"Regular",
+  True,"Diabetes",False,
+  False,False,False,False,False,False,
+  "Medium","Cost concern","SMS",False,
+  "OPEN","HIGH","Never screened + Obese + Sedentary + Diabetes","Medium","2D Mammogram",
+  ["SMS outreach","Confirm $0 copay coverage","Find nearest in-network facility","Address transportation barrier","Follow up in 14 days"],
+  "SMS","Care Manager → PCP",14),
+
+p("P-012","Never Screened — Low Risk — Newly Eligible","Never Screened",
+  "PASS","FAIL",False, True,False,
+  "Never Screened","Never","None",False,"None",False,
+  "Negative",False,False,False,"Normal",False,False,False,False,False,"None",
+  False,"None",False,
+  False,False,False,False,False,False,
+  "High","None","SMS",True,
+  "OPEN","MEDIUM","Never screened — newly eligible at age 42","Low","2D Mammogram",
+  ["Welcome outreach — first-time screening education","SMS with facility scheduling link","Educate on importance of preventive screening","Follow up in 21 days"],
+  "SMS","PCP notification",21),
+
+# ── GROUP 4: OVERDUE — VERY HIGH RISK ────────────────────────────────────
+p("P-013","Overdue Very High Risk — BRCA+ HRT Family History Dense Breast","Overdue — Very High Risk",
+  "PASS","PASS",False, True,False,
+  "Overdue",">24 months","2D Screening",True,"Screening (Z12.31)",False,
+  "Positive","Yes (mother+sister)","Yes (D)",True,"Obese (BMI>30)","Atypical Hyperplasia",True,True,True,True,"Occasional",
+  True,"Diabetes + Hypertension","Anxiety",
+  False,False,False,False,False,False,
+  "Low","Fear of results","Phone",True,
+  "OPEN","VERY HIGH","BRCA+ + HRT + Family history (mother+sister) + Dense breast D + Overdue","Very High","MRI + 3D Mammogram (DBT)",
+  ["Urgent phone outreach","Care manager to address fear barrier","Refer to oncologist for BRCA counseling","Alert PCP + OB-GYN","Upgrade to MRI + 3D mammogram","Follow up in 7 days"],
+  "Phone (urgent)","Care Manager → PCP → OB-GYN → Oncologist",7),
+
+p("P-014","Overdue Very High Risk — BRCA+ Isolated","Overdue — Very High Risk",
+  "PASS","PASS",False, True,False,
+  "Overdue",">24 months","3D Screening",True,"Screening (Z12.31)",False,
+  "Positive",False,"Yes (C)",False,"Normal",False,False,False,False,False,"None",
+  False,"None",False,
+  False,False,False,False,False,False,
+  "High","None","SMS",True,
+  "OPEN","VERY HIGH","BRCA+ overdue — no other risk but BRCA alone is high-risk flag","Very High","MRI + 3D Mammogram",
+  ["SMS outreach — high engagement expected","Refer for BRCA genetic counseling update","Alert PCP for MRI order","Follow up in 14 days"],
+  "SMS","Care Manager → PCP → Oncologist",14),
+
+p("P-015","Overdue Very High Risk — HRT Family History Dense Breast Obese","Overdue — Very High Risk",
+  "PASS","PASS",False, True,False,
+  "Overdue",">24 months","2D Screening",True,"Screening (Z12.31)",False,
+  "Untested","Yes (mother)","Yes (C)",True,"Obese (BMI>30)","Benign",True,True,True,True,"Occasional",
+  True,"Diabetes + Hypertension","Anxiety",
+  False,False,False,False,False,False,
+  "Medium","Fear of results","SMS",True,
+  "OPEN","VERY HIGH","HRT + Family history + Dense breast C + Obese + BRCA untested + Overdue","Very High","3D Mammogram (DBT)",
+  ["SMS outreach (weekday evening)","Care manager call to address fear","Refer for BRCA genetic counseling","Alert PCP — issue 3D mammogram referral","Follow up in 14 days"],
+  "SMS → Phone escalation","Care Manager → PCP → OB-GYN",14),
+
+p("P-016","Overdue Very High Risk — BRCA Untested Family History HRT Low Engagement","Overdue — Very High Risk",
+  "PASS","PASS",False, True,False,
+  "Overdue",">24 months","2D",True,"Screening (Z12.31)",False,
+  "Untested","Yes (sister+maternal aunt)","Yes (C)",True,"Overweight",False,True,True,True,False,"Regular",
+  True,"Hypertension",False,
+  False,False,False,False,False,False,
+  "Low","No time","Mail",True,
+  "OPEN","VERY HIGH","BRCA untested + Multiple family history + HRT + Low engagement","Very High","3D Mammogram (DBT)",
+  ["Mail outreach first","Phone follow-up within 7 days","Refer for BRCA testing urgently","Alert PCP + OB-GYN","Follow up in 14 days"],
+  "Mail → Phone escalation","Care Manager → PCP → OB-GYN",14),
+
+p("P-017","Overdue Very High Risk — Prior Atypical Hyperplasia Dense Breast D","Overdue — Very High Risk",
+  "PASS","PASS",False, True,False,
+  "Overdue",">24 months","3D Screening",True,"Screening (Z12.31)",False,
+  "Negative","Yes (mother)","Yes (D)",True,"Obese","Atypical Hyperplasia",True,False,False,True,"Occasional",
+  True,"Diabetes","Depression",
+  False,False,False,False,False,False,
+  "Low","Fear of results + Mental health","Phone",False,
+  "OPEN","VERY HIGH","Atypical hyperplasia biopsy + Dense breast D + HRT + Depression barrier","Very High","MRI + 3D Mammogram",
+  ["Phone outreach with care manager","Mental health-sensitive communication","Transportation assistance coordination","Alert PCP — MRI + 3D referral","Follow up in 7 days"],
+  "Phone (care manager)","Care Manager → PCP → OB-GYN",7),
+
+p("P-018","Overdue Very High Risk — All Risk Factors Severely Low Engagement","Overdue — Very High Risk",
+  "PASS","PASS",False, True,False,
+  "Overdue",">36 months","2D",True,"Screening (Z12.31)",False,
+  "Positive","Yes (mother+sister+maternal aunt)","Yes (D)",True,"Obese (BMI>35)","Atypical Hyperplasia",True,True,True,True,"Regular",
+  True,"Diabetes + Hypertension","Depression + Anxiety",
+  False,False,False,False,False,False,
+  "Very Low","Fear + Transportation + Mental health","Phone",False,
+  "OPEN","VERY HIGH (CRITICAL)","All major risk factors present + 36+ months overdue + Multiple barriers","Very High","MRI + 3D Mammogram",
+  ["Urgent phone outreach — care manager","Social worker referral for transportation","Mental health navigator involvement","Escalate to PCP + OB-GYN + Oncologist","Home visit coordination if possible","Follow up in 5 days"],
+  "Phone (care manager + social worker)","Care Manager → Social Worker → PCP → OB-GYN → Oncologist",5),
+
+# ── GROUP 5: OVERDUE — HIGH RISK ─────────────────────────────────────────
+p("P-019","Overdue High Risk — HRT with Family History","Overdue — High Risk",
+  "PASS","PASS",False, True,False,
+  "Overdue",">24 months","2D Screening",True,"Screening (Z12.31)",False,
+  "Negative","Yes (mother)","No (B)",True,"Overweight",False,False,True,True,False,"Occasional",
+  True,"Hypertension",False,
+  False,False,False,False,False,False,
+  "Medium","No time","SMS",True,
+  "OPEN","HIGH","HRT + Family history + First pregnancy after 30 + Overdue","High","2D Mammogram",
+  ["SMS outreach (evening)","Alert PCP — issue mammogram referral","Educate on HRT risk","Follow up in 14 days"],
+  "SMS","Care Manager → PCP",14),
+
+p("P-020","Overdue High Risk — Dense Breast Obese Sedentary","Overdue — High Risk",
+  "PASS","PASS",False, True,False,
+  "Overdue",">24 months","2D Screening",True,"Screening (Z12.31)",False,
+  "Negative",False,"Yes (C)",False,"Obese (BMI>30)",False,False,False,True,True,"Regular",
+  True,"Diabetes",False,
+  False,False,False,False,False,False,
+  "Medium","None","SMS",True,
+  "OPEN","HIGH","Dense breast C + Obese + Sedentary + Regular alcohol","High","3D Mammogram (DBT)",
+  ["SMS outreach","Recommend 3D mammogram due to dense breast","Alert PCP","Follow up in 14 days"],
+  "SMS","Care Manager → PCP",14),
+
+p("P-021","Overdue High Risk — Family History Only High Engagement","Overdue — High Risk",
+  "PASS","PASS",False, True,False,
+  "Overdue",">24 months","2D Screening",True,"Screening (Z12.31)",False,
+  "Negative","Yes (mother)",False,False,"Normal",False,False,False,False,False,"None",
+  False,"None",False,
+  False,False,False,False,False,False,
+  "High","None","SMS",True,
+  "OPEN","HIGH","Family history (mother) overdue — high engagement ideal for quick closure","High","2D Mammogram",
+  ["SMS outreach — high response expected","Scheduling link in SMS","Alert PCP","Follow up in 14 days"],
+  "SMS","PCP notification",14),
+
+p("P-022","Overdue High Risk — HRT Only","Overdue — High Risk",
+  "PASS","PASS",False, True,False,
+  "Overdue",">24 months","2D Screening",True,"Screening (Z12.31)",False,
+  "Negative",False,False,True,"Normal",False,False,False,False,False,"None",
+  False,"None",False,
+  False,False,False,False,False,False,
+  "High","None","SMS",True,
+  "OPEN","HIGH","HRT use elevates risk — overdue","High","2D Mammogram",
+  ["SMS outreach","Educate on HRT-related breast cancer risk","Alert PCP","Follow up in 14 days"],
+  "SMS","PCP → OB-GYN",14),
+
+p("P-023","Overdue High Risk — Prior Chest Radiation Dense Breast","Overdue — High Risk",
+  "PASS","PASS",False, True,False,
+  "Overdue",">24 months","3D Screening",True,"Screening (Z12.31)",False,
+  "Negative",False,"Yes (C)",False,"Normal",False,False,False,False,False,"None",
+  False,"None",False,
+  False,False,False,False,False,False,
+  "Medium","None","SMS",True,
+  "OPEN","HIGH","Prior chest radiation before age 30 + Dense breast C + Overdue","High","3D Mammogram (DBT)",
+  ["SMS outreach","Alert PCP — chest radiation history noted","Recommend 3D mammogram","Follow up in 14 days"],
+  "SMS","Care Manager → PCP → Oncologist",14),
+
+p("P-024","Overdue High Risk — Multiple Lifestyle Risks Low Health Literacy","Overdue — High Risk",
+  "PASS","PASS",False, True,False,
+  "Overdue",">24 months","2D Screening",True,"Screening (Z12.31)",False,
+  "Untested",False,False,False,"Obese (BMI>35)",False,True,False,True,True,"Regular",
+  True,"Diabetes + Hypertension",False,
+  False,False,False,False,False,False,
+  "Low","Low health literacy","Phone",False,
+  "OPEN","HIGH","Obese + Sedentary + Regular alcohol + Diabetes + Low health literacy + Transportation barrier","High","2D Mammogram",
+  ["Phone outreach with simplified language","Health literacy-appropriate education","Transportation assistance referral","Alert PCP","Follow up in 14 days"],
+  "Phone","Care Manager → Social Worker → PCP",14),
+
+# ── GROUP 6: OVERDUE — MEDIUM RISK ───────────────────────────────────────
+p("P-025","Overdue Medium Risk — Transportation Barrier","Overdue — Medium Risk",
+  "PASS","PASS",False, True,False,
+  "Overdue",">24 months","2D Screening",True,"Screening (Z12.31)",False,
+  "Negative",False,False,False,"Obese",False,False,False,True,True,"None",
+  True,"Diabetes",False,
+  False,False,False,False,False,False,
+  "Medium","Transportation","Phone",False,
+  "OPEN","MEDIUM","Overdue + Obese + Transportation barrier","Medium","2D Mammogram",
+  ["Phone outreach","Connect to transportation assistance program","Find closest in-network facility","Alert PCP","Follow up in 14 days"],
+  "Phone","Care Manager → Social Worker → PCP",14),
+
+p("P-026","Overdue Medium Risk — Mental Health Barrier","Overdue — Medium Risk",
+  "PASS","PASS",False, True,False,
+  "Overdue",">24 months","2D Screening",True,"Screening (Z12.31)",False,
+  "Negative",False,False,False,"Normal",False,False,False,False,False,"None",
+  False,"None","Depression",
+  False,False,False,False,False,False,
+  "Low","Mental health (Depression)","SMS",True,
+  "OPEN","MEDIUM","Overdue + Depression — engagement risk","Medium","2D Mammogram",
+  ["SMS outreach — empathetic messaging","Mental health navigator support","Care manager gentle follow-up","Follow up in 14 days"],
+  "SMS","Care Manager → Mental Health Navigator → PCP",14),
+
+p("P-027","Overdue Medium Risk — Language Barrier Non-English","Overdue — Medium Risk",
+  "PASS","PASS",False, True,False,
+  "Overdue",">24 months","2D Screening",True,"Screening (Z12.31)",False,
+  "Untested",False,False,False,"Overweight",False,False,True,False,False,"None",
+  True,"Hypertension",False,
+  False,False,False,False,False,False,
+  "Medium","Language (non-English preferred)","Phone (interpreter needed)",True,
+  "OPEN","MEDIUM","Overdue + Language barrier + BRCA untested","Medium","2D Mammogram",
+  ["Phone outreach with interpreter","Language-appropriate educational materials","Alert PCP","Follow up in 14 days"],
+  "Phone (with interpreter)","Care Manager → PCP",14),
+
+p("P-028","Overdue Medium Risk — No Barriers Standard","Overdue — Medium Risk",
+  "PASS","PASS",False, True,False,
+  "Overdue",">24 months","2D Screening",True,"Screening (Z12.31)",False,
+  "Negative",False,"No (B)",False,"Normal",False,False,False,False,False,"Occasional",
+  False,"None",False,
+  False,False,False,False,False,False,
+  "High","None","SMS",True,
+  "OPEN","MEDIUM","Overdue — no risk factors — standard outreach needed","Low","2D Mammogram",
+  ["SMS outreach with scheduling link","Reminder of $0 copay","Follow up in 21 days"],
+  "SMS","PCP notification",21),
+
+# ── GROUP 7: OVERDUE — LOW RISK ───────────────────────────────────────────
+p("P-029","Overdue Low Risk — Cost Concern Barrier","Overdue — Low Risk",
+  "PASS","PASS",False, True,False,
+  "Overdue",">24 months","2D Screening",True,"Screening (Z12.31)",False,
+  "Negative",False,False,False,"Normal",False,False,False,False,False,"None",
+  False,"None",False,
+  False,False,False,False,False,False,
+  "Medium","Cost concern","SMS",True,
+  "OPEN","LOW","Overdue — low risk — cost misperception barrier","Low","2D Mammogram",
+  ["SMS outreach","Clearly communicate $0 copay benefit","Follow up in 21 days"],
+  "SMS","PCP notification",21),
+
+p("P-030","Overdue Low Risk — No Known Barrier Forgot","Overdue — Low Risk",
+  "PASS","PASS",False, True,False,
+  "Overdue","24-27 months","2D Screening",True,"Screening (Z12.31)",False,
+  "Negative",False,False,False,"Normal",False,False,False,False,False,"None",
+  False,"None",False,
+  False,False,False,False,False,False,
+  "High","None (likely forgot)","SMS",True,
+  "OPEN","LOW","Just became overdue — no risk factors — likely forgot","Low","2D Mammogram",
+  ["Simple SMS reminder with scheduling link","Follow up in 21 days"],
+  "SMS","PCP notification",21),
+
+p("P-031","Overdue Low Risk — Self-Reported Mammogram Unverified","Overdue — Low Risk",
+  "PASS","PASS",False, True,False,
+  "Overdue (in claims)","Unknown (self-reported)","2D (self-reported)",False,"Self-reported (not adjudicated)","Unknown",
+  "Negative",False,False,False,"Normal",False,False,False,False,False,"None",
+  False,"None",False,
+  False,False,False,False,False,False,
+  "High","None","SMS",True,
+  "OPEN (pending verification)","LOW","Member self-reports mammogram — no claim found — needs verification","Low","2D Mammogram",
+  ["Request mammogram report from facility","Document place of service","Attempt claim lookup at out-of-network facility","If unverified — schedule new mammogram","Follow up in 14 days"],
+  "SMS → Phone for verification","PCP for record request",14),
+
+p("P-032","Overdue Low Risk — Out of Network Claim Missing","Overdue — Low Risk",
+  "PASS","PASS",False, True,False,
+  "Overdue (in adjudicated claims)","Unknown (OON claim)","Unknown","Unknown","Possibly out-of-network screening","Unknown",
+  "Negative",False,False,False,"Normal",False,False,False,False,False,"None",
+  False,"None",False,
+  False,False,False,False,False,False,
+  "High","None","SMS",True,
+  "OPEN (pending OON claim check)","LOW","No in-network claim — possible OON mammogram not captured","Low","2D Mammogram",
+  ["Check out-of-network claims database","Request medical record from member","If confirmed — document and close gap","If unconfirmed — schedule new mammogram","Follow up in 14 days"],
+  "SMS → Phone for verification","PCP for record request",14),
+
+# ── GROUP 8: PROACTIVE WINDOW ─────────────────────────────────────────────
+p("P-033","Proactive Window — BRCA+ Very High Risk","Proactive Window",
+  "PASS","PASS",False, True,False,
+  "Proactive (18-24 months)","18-24 months","3D Screening",True,"Screening (Z12.31)",True,
+  "Positive",True,"Yes (C)",True,"Obese",False,True,True,True,False,"Occasional",
+  True,"Hypertension",False,
+  False,False,False,False,False,False,
+  "High","None","SMS",True,
+  "PROACTIVE","VERY HIGH","BRCA+ approaching lookback end — must screen before gap opens","Very High","MRI + 3D Mammogram",
+  ["Proactive SMS — schedule before gap opens","Alert PCP for MRI order","Schedule within next 3 months","Follow up in 30 days"],
+  "SMS","PCP → Oncologist",30),
+
+p("P-034","Proactive Window — HRT Family History High Risk","Proactive Window",
+  "PASS","PASS",False, True,False,
+  "Proactive (18-24 months)","18-24 months","2D Screening",True,"Screening (Z12.31)",True,
+  "Untested","Yes (mother)","Yes (C)",True,"Overweight",False,True,True,True,True,"Occasional",
+  True,"Hypertension",False,
+  False,False,False,False,False,False,
+  "Medium","No time","SMS",True,
+  "PROACTIVE","HIGH","HRT + Family history + Dense breast — approaching gap","High","3D Mammogram (DBT)",
+  ["Proactive SMS reminder","Recommend upgrade to 3D","Alert PCP","Schedule within 4 months","Follow up in 30 days"],
+  "SMS","PCP",30),
+
+p("P-035","Proactive Window — Dense Breast Only","Proactive Window",
+  "PASS","PASS",False, True,False,
+  "Proactive (18-24 months)","18-24 months","2D Screening",True,"Screening (Z12.31)",True,
+  "Negative",False,"Yes (C)",False,"Normal",False,False,False,False,False,"None",
+  False,"None",False,
+  False,False,False,False,False,False,
+  "High","None","SMS",True,
+  "PROACTIVE","MEDIUM","Dense breast — approaching window — recommend 3D upgrade","Medium","3D Mammogram (DBT)",
+  ["Proactive SMS","Recommend 3D upgrade due to dense breast","Schedule within 6 months","Follow up in 45 days"],
+  "SMS","PCP",45),
+
+p("P-036","Proactive Window — No Risk Factors High Engagement","Proactive Window",
+  "PASS","PASS",False, True,False,
+  "Proactive (18-24 months)","18-24 months","2D Screening",True,"Screening (Z12.31)",True,
+  "Negative",False,False,False,"Normal",False,False,False,False,False,"None",
+  False,"None",False,
+  False,False,False,False,False,False,
+  "High","None","SMS",True,
+  "PROACTIVE","LOW","No risk factors — approaching window — easy closure expected","Low","2D Mammogram",
+  ["Gentle SMS reminder","Scheduling link included","Follow up in 60 days"],
+  "SMS","None",60),
+
+p("P-037","Proactive Window — Low Engagement Fear Barrier","Proactive Window",
+  "PASS","PASS",False, True,False,
+  "Proactive (18-24 months)","18-24 months","2D Screening",True,"Screening (Z12.31)",True,
+  "Negative",False,False,False,"Normal",False,False,False,False,False,"None",
+  False,"None","Anxiety",
+  False,False,False,False,False,False,
+  "Low","Fear of results","Phone",True,
+  "PROACTIVE","MEDIUM","Approaching window + Fear barrier — early engagement critical","Low","2D Mammogram",
+  ["Phone outreach — empathetic messaging","Address fear early before gap opens","Care manager support","Follow up in 30 days"],
+  "Phone","Care Manager",30),
+
+p("P-038","Proactive Window — Comorbidities Medium Engagement","Proactive Window",
+  "PASS","PASS",False, True,False,
+  "Proactive (18-24 months)","18-24 months","2D Screening",True,"Screening (Z12.31)",True,
+  "Negative",False,False,False,"Obese",False,False,False,True,True,"None",
+  True,"Diabetes + Hypertension",False,
+  False,False,False,False,False,False,
+  "Medium","No time","SMS",True,
+  "PROACTIVE","MEDIUM","Comorbidities + Obese + Sedentary — coordinate with PCP during next visit","Medium","2D Mammogram",
+  ["SMS proactive reminder","Coordinate with PCP at next diabetes/hypertension visit","Follow up in 45 days"],
+  "SMS","PCP coordination",45),
+
+p("P-039","Proactive Window — Transportation Barrier","Proactive Window",
+  "PASS","PASS",False, True,False,
+  "Proactive (18-24 months)","18-24 months","2D Screening",True,"Screening (Z12.31)",True,
+  "Negative",False,False,False,"Normal",False,False,False,False,False,"None",
+  False,"None",False,
+  False,False,False,False,False,False,
+  "Medium","Transportation","Phone",False,
+  "PROACTIVE","MEDIUM","Transportation barrier — proactive coordination needed before gap opens","Low","2D Mammogram",
+  ["Phone outreach","Arrange transportation early","Find mobile mammography unit if available","Follow up in 30 days"],
+  "Phone","Social Worker → Care Manager",30),
+
+p("P-040","Proactive Window — Diagnostic Mammogram Only No Screening","Proactive Window",
+  "PASS","PASS",False, True,False,
+  "Proactive — Partially Done","18-24 months (for screening)","Diagnostic (NOT screening)",False,"Diagnostic (NOT Z12.31)",True,
+  "Negative",False,False,False,"Normal",False,False,False,False,False,"None",
+  False,"None",False,
+  False,False,False,False,False,False,
+  "High","Confusion about diagnostic vs screening","SMS",True,
+  "PROACTIVE","MEDIUM","Only diagnostic mammogram found — screening mammogram still needed for compliance","Low","2D Screening Mammogram",
+  ["SMS outreach","Educate: diagnostic != preventive screening","Schedule screening mammogram separately","Alert PCP to issue screening referral","Follow up in 21 days"],
+  "SMS","PCP",21),
+
+# ── GROUP 9: COMPLIANT ────────────────────────────────────────────────────
+p("P-041","Compliant — 2D Mammogram No Risk Factors","Compliant",
+  "PASS","PASS",False, True,False,
+  "Compliant","< 18 months","2D Screening",True,"Screening (Z12.31)",True,
+  "Negative",False,False,False,"Normal",False,False,False,False,False,"None",
+  False,"None",False,
+  False,False,False,False,False,False,
+  "High","None","SMS",True,
+  "CLOSED","N/A","Compliant — valid 2D screening mammogram within window","Low","2D Mammogram (next cycle)",
+  ["No action needed","Schedule proactive reminder at 18-month mark"],
+  "None","None","N/A"),
+
+p("P-042","Compliant — 3D Mammogram Dense Breast High Risk","Compliant",
+  "PASS","PASS",False, True,False,
+  "Compliant","< 18 months","3D Screening (DBT)",True,"Screening (Z12.31)",True,
+  "Negative","Yes (mother)","Yes (C)",True,"Overweight",False,False,False,False,False,"None",
+  True,"Hypertension",False,
+  False,False,False,False,False,False,
+  "High","None","SMS",True,
+  "CLOSED","N/A","Compliant — 3D mammogram appropriate for dense breast","High","3D Mammogram (next cycle)",
+  ["No action needed","Proactive reminder at 18-month mark","Continue 3D recommendation next cycle"],
+  "None","None","N/A"),
+
+p("P-043","Compliant — BRCA+ Mammogram Done MRI Also Needed","Compliant",
+  "PASS","PASS",False, True,False,
+  "Compliant (BCS only)","< 18 months","3D Screening",True,"Screening (Z12.31)",True,
+  "Positive",True,"Yes (D)",True,"Normal",False,False,False,False,False,"None",
+  False,"None",False,
+  False,False,False,False,False,False,
+  "High","None","SMS",True,
+  "CLOSED","N/A","BCS compliant — but BRCA+ warrants additional MRI (outside BCS measure)","Very High","MRI (supplemental — not BCS)",
+  ["BCS gap closed","Refer for annual MRI (supplemental — outside BCS)","Alert oncologist for BRCA management"],
+  "None (BCS closed)","Oncologist for MRI referral","N/A"),
+
+p("P-044","Compliant — Unilateral Mastectomy Screening Remaining Breast","Compliant",
+  "PASS","PASS",False, True,False,
+  "Compliant","< 18 months","Unilateral Screening (one breast)",True,"Screening (Z12.31)",True,
+  "Any",True,"Yes (remaining breast)","Any","Any","Yes (cancer history — one breast removed)","Any","Any","Any","Any","Any",
+  "Any","Any","Any",
+  False,False,False,False,False,False,
+  "High","None","SMS",True,
+  "CLOSED","N/A","Unilateral screening of remaining breast — compliant with documentation","High","Unilateral + MRI consideration",
+  ["BCS gap closed","Ensure unilateral mastectomy documented (Z90.11 or Z90.12)","Continue annual screening of remaining breast"],
+  "None","Oncologist","N/A"),
+
+p("P-045","Non-Compliant — CAD Only Without Proper Screening Type","Compliant (False)",
+  "PASS","PASS",False, True,False,
+  "Overdue (appears compliant but is NOT)","Within window","CAD only — no proper screening type",False,"Ambiguous",True,
+  "Any","Any","Any","Any","Any","Any","Any","Any","Any","Any","Any",
+  "Any","Any","Any",
+  False,False,False,False,False,False,
+  "Medium","Confusion about compliance","SMS",True,
+  "OPEN","MEDIUM","CAD alone does not satisfy BCS — proper screening mammogram required","Any","2D or 3D Mammogram (proper type)",
+  ["SMS outreach","Educate — CAD alone is not compliant","Schedule proper screening mammogram","Alert PCP to correct order","Follow up in 14 days"],
+  "SMS","PCP",14),
+
+p("P-046","Non-Compliant — CPT 77063 Without 77067","Compliant (False)",
+  "PASS","PASS",False, True,False,
+  "Overdue (claim found but invalid)","Within window","3D add-on only (77063 standalone)",False,"Incomplete — missing 77067",True,
+  "Any","Any","Any","Any","Any","Any","Any","Any","Any","Any","Any",
+  "Any","Any","Any",
+  False,False,False,False,False,False,
+  "Medium","None (billing error — not member issue)","SMS",True,
+  "OPEN","MEDIUM","77063 billed without 77067 — add-on code cannot stand alone","Any","2D or 3D (with correct billing)",
+  ["Alert provider to rebill with 77067 + 77063","Request corrected claim","If corrected claim received — close gap","If no rebill — schedule new mammogram","Follow up in 14 days"],
+  "Provider outreach first","Provider billing → PCP",14),
+
+p("P-047","Non-Compliant — MRI or Ultrasound Only No Mammogram","Compliant (False)",
+  "PASS","PASS",False, True,False,
+  "Overdue (MRI/Ultrasound not acceptable)","Within window but wrong type","MRI / Breast Ultrasound / Biopsy",False,"Non-compliant imaging type",True,
+  "Any",True,True,"Any","Any","Any","Any","Any","Any","Any","Any",
+  "Any","Any","Any",
+  False,False,False,False,False,False,
+  "Medium","Confusion about acceptable tests","SMS",True,
+  "OPEN","MEDIUM","MRI/Ultrasound/Biopsy alone — mammogram required for BCS compliance","Any","2D or 3D Mammogram (required)",
+  ["SMS outreach","Educate — MRI/Ultrasound/Biopsy alone does not close BCS gap","Schedule mammogram","Alert PCP to order correct screening","Follow up in 14 days"],
+  "SMS","PCP",14),
+
+p("P-048","Compliant — Mammogram Done But Pending Follow-up BI-RADS 3 or 4","Compliant",
+  "PASS","PASS",False, True,False,
+  "Compliant (screening done)","< 18 months","2D or 3D Screening",True,"Screening (Z12.31)",True,
+  "Any","Any",True,"Any","Any","Any","Any","Any","Any","Any","Any",
+  "Any","Any","Any",
+  False,False,False,False,False,False,
+  "Any","Fear of results","Phone",True,
+  "CLOSED","HIGH (clinical follow-up needed)","BCS gap closed but BI-RADS 3/4 requires follow-up action","High","Follow-up imaging (diagnostic — not BCS)",
+  ["BCS gap closed — screening done","Ensure follow-up diagnostic imaging is scheduled","Care manager to coordinate follow-up","Alert PCP + Radiologist","Track follow-up completion"],
+  "Phone (care manager)","PCP → Radiologist → Oncologist if needed",7),
+
+# ── GROUP 10: EDGE CASES ─────────────────────────────────────────────────
+p("P-049","Edge Case — Current Age 42 Mammogram at Age 40 Counts","Edge Case",
+  "PASS","PASS",False, True,False,
+  "Compliant (lookback age rule applies)","< 24 months (within window)","2D Screening",True,"Screening (Z12.31)",True,
+  "Negative",False,False,False,"Normal",False,False,False,False,False,"None",
+  False,"None",False,
+  False,False,False,False,False,False,
+  "High","None","SMS",True,
+  "CLOSED","N/A","Mammogram at age 40 counts — lookback age rule (40+) satisfied","Low","2D Mammogram (next cycle)",
+  ["No action needed","Proactive reminder at 18-month mark"],
+  "None","None","N/A"),
+
+p("P-050","Edge Case — Mammogram at Age 39 Below Lookback Threshold","Edge Case",
+  "PASS","FAIL",False, True,False,
+  "Overdue (mammogram at 39 does not count)","> 24 months (valid window only)","2D Screening (done at age 39)",False,"Screening (Z12.31) — but lookback age fails",False,
+  "Negative",False,False,False,"Normal",False,False,False,False,False,"None",
+  False,"None",False,
+  False,False,False,False,False,False,
+  "High","Confusion (thinks they are compliant)","SMS",True,
+  "OPEN","MEDIUM","Mammogram at age 39 does not meet lookback age minimum of 40","Low","2D Mammogram",
+  ["SMS outreach","Educate — prior mammogram at age 39 does not count","Schedule new screening mammogram","Follow up in 21 days"],
+  "SMS","PCP",21),
+
+p("P-051","Edge Case — Two Unilateral Mastectomies Less Than 14 Days Apart","Edge Case",
+  "PASS","N/A",False, True,False,
+  "Unclear — exclusion pending validation","N/A pending exclusion check","N/A pending exclusion check","N/A","N/A pending exclusion check","N/A",
+  "Any","Any","Any","Any","Any","Any","Any","Any","Any","Any","Any",
+  "Any","Any","Any",
+  False,False,False,False,False,False,
+  "Any","Any","Any","Any",
+  "OPEN (not excluded — 14-day rule not satisfied)","MEDIUM","Two unilateral mastectomies < 14 days apart — bilateral exclusion NOT met — still in measure","High","Per clinical guidance",
+  ["Verify dates of both mastectomies","If < 14 days apart — member remains in BCS measure","Consult clinical team for appropriate screening path","Alert PCP for clarification","Follow up in 14 days"],
+  "Phone (care manager)","Care Manager → PCP → Oncologist",14),
 ]
-
-AGE_BANDS = [
-    {"code": "AB1", "label": "Age 42-65", "min_age": 42, "max_age": 65},
-    {"code": "AB2", "label": "Age 66-74", "min_age": 66, "max_age": 74},
-]
-
-EXCLUSIONS_AB1 = [
-    "bilateral_mastectomy", "unilateral_mastectomy_both_sides",
-    "gender_affirming_chest_surgery", "hospice_or_palliative", "deceased",
-]
-
-EXCLUSIONS_AB2 = [
-    "bilateral_mastectomy", "unilateral_mastectomy_both_sides",
-    "gender_affirming_chest_surgery", "hospice_or_palliative", "deceased",
-    "frailty_advanced_illness", "institutional_snp_or_ltc_66plus",
-]
-
-MAMMOGRAPHY_CPT = ["77062", "77061", "77066", "77065", "77063", "77067"]
-
-EXCLUSION_CODES = {
-    "bilateral_mastectomy": {
-        "ICD10PCS": ["0HTV0ZZ"],
-        "ICD10CM":  ["Z90.13"],
-    },
-    "unilateral_mastectomy_both_sides": {
-        "CPT":      ["19180","19200","19220","19240","19303","19304","19305","19306","19307"],
-        "Modifier": ["50","LT","RT"],
-        "ICD10CM":  ["Z90.12","Z90.11"],
-        "ICD10PCS": ["0HTU0ZZ","0HTT0ZZ"],
-    },
-    "gender_affirming_chest_surgery": {
-        "CPT":     ["19318"],
-        "ICD10CM": ["F64.1","F64.2","F64.8","F64.9","Z87.890"],
-    },
-}
-
-
-def build_personas():
-    personas, idx = [], 1
-
-    # 3 NOT_ELIGIBLE
-    for reason, desc in [
-        ("gender_not_female", "None of GC1/GC2/GC3 criteria met — gender not Female"),
-        ("age_outside_range", "Age outside eligible range 42-74"),
-        ("not_enrolled",      "Continuous enrollment requirement not met"),
-    ]:
-        personas.append({
-            "persona_id": f"BCS_P{idx:03d}", "measure": "BCS-E",
-            "care_gap_status": "NOT_ELIGIBLE", "not_eligible_reason": reason,
-            "gender_criteria_code": None, "age_band_code": None,
-            "exclusion_reason": None, "mammogram_found": None,
-            "description": f"NOT_ELIGIBLE: {desc}",
-        })
-        idx += 1
-
-    # 12 COMPLIANT / OPEN_GAP
-    for gc in GENDER_CRITERIA:
-        for ab in AGE_BANDS:
-            for mammo in [True, False]:
-                status = "COMPLIANT" if mammo else "OPEN_GAP"
-                personas.append({
-                    "persona_id": f"BCS_P{idx:03d}", "measure": "BCS-E",
-                    "care_gap_status": status, "not_eligible_reason": None,
-                    "gender_criteria_code": gc["code"], "gender_criteria_label": gc["label"],
-                    "age_band_code": ab["code"], "age_band_label": ab["label"],
-                    "min_age": ab["min_age"], "max_age": ab["max_age"],
-                    "exclusion_reason": None, "mammogram_found": mammo,
-                    "description": (
-                        f"{status}: {gc['label']} | {ab['label']} | "
-                        f"Enrolled | No exclusion | Mammogram={'Yes' if mammo else 'No'}"
-                    ),
-                })
-                idx += 1
-
-    # 15 EXCLUDED (AB1) + 21 EXCLUDED (AB2)
-    for gc in GENDER_CRITERIA:
-        for ab in AGE_BANDS:
-            exclusions = EXCLUSIONS_AB1 if ab["code"] == "AB1" else EXCLUSIONS_AB2
-            for excl in exclusions:
-                personas.append({
-                    "persona_id": f"BCS_P{idx:03d}", "measure": "BCS-E",
-                    "care_gap_status": "EXCLUDED", "not_eligible_reason": None,
-                    "gender_criteria_code": gc["code"], "gender_criteria_label": gc["label"],
-                    "age_band_code": ab["code"], "age_band_label": ab["label"],
-                    "min_age": ab["min_age"], "max_age": ab["max_age"],
-                    "exclusion_reason": excl, "mammogram_found": None,
-                    "description": f"EXCLUDED: {gc['label']} | {ab['label']} | {excl}",
-                })
-                idx += 1
-
-    return personas
-
-
-def load_graph(driver, personas):
-    with driver.session(database=DB) as session:
-        for label, prop in [
-            ("Persona","persona_id"), ("Measure","measure_id"),
-            ("ComplianceCode","code"), ("ExclusionCode","code"),
-        ]:
-            session.run(f"CREATE CONSTRAINT IF NOT EXISTS FOR (n:{label}) REQUIRE n.{prop} IS UNIQUE")
-
-        session.run("MATCH (p:Persona) DETACH DELETE p")
-
-        session.run("""
-            MERGE (m:Measure {measure_id: 'BCS-E'})
-            SET m.name             = 'Breast Cancer Screening',
-                m.product_lines    = 'Advantage MD, EHP, Priority Partners, USFHP',
-                m.eligible_age_min = 42,
-                m.eligible_age_max = 74,
-                m.eligible_gender  = 'Female',
-                m.lookback_start   = 'Oct 1 two years prior to measurement year',
-                m.lookback_end     = 'Dec 31 of measurement year',
-                m.measurement_year = 2026
-        """)
-
-        for cpt in MAMMOGRAPHY_CPT:
-            session.run("""
-                MERGE (c:ComplianceCode {code: $code})
-                SET c.type = 'CPT', c.measure = 'BCS-E', c.description = 'Mammography CPT'
-                WITH c MATCH (m:Measure {measure_id: 'BCS-E'})
-                MERGE (m)-[:HAS_COMPLIANCE_CODE]->(c)
-            """, code=cpt)
-
-        for excl_name, code_map in EXCLUSION_CODES.items():
-            for code_type, codes in code_map.items():
-                for code in codes:
-                    session.run("""
-                        MERGE (e:ExclusionCode {code: $code})
-                        SET e.type = $code_type, e.exclusion_reason = $excl_name, e.measure = 'BCS-E'
-                        WITH e MATCH (m:Measure {measure_id: 'BCS-E'})
-                        MERGE (m)-[:HAS_EXCLUSION_CODE]->(e)
-                    """, code=code, code_type=code_type, excl_name=excl_name)
-
-        session.run("""
-            UNWIND $personas AS p
-            MERGE (n:Persona {persona_id: p.persona_id})
-            SET n += p
-            WITH n
-            MATCH (m:Measure {measure_id: 'BCS-E'})
-            MERGE (n)-[:BELONGS_TO_MEASURE]->(m)
-        """, personas=personas)
-
-        print(f"Loaded {len(personas)} realistic BCS-E personas into Neo4j.")
-
-
-def main():
-    personas = build_personas()
-    from collections import Counter
-    counts = Counter(p["care_gap_status"] for p in personas)
-    print(f"Generated {len(personas)} personas: {dict(counts)}")
-
-    out_path = os.path.join(os.path.dirname(__file__), "bcs_all_combinations.json")
-    with open(out_path, "w") as f:
-        json.dump(personas, f, indent=2)
-    print(f"Saved to: {out_path}")
-
-    driver = GraphDatabase.driver(URI, auth=(USER, PASSWORD))
-    try:
-        driver.verify_connectivity()
-        print("Neo4j connected. Loading personas...")
-        load_graph(driver, personas)
-    finally:
-        driver.close()
-
-
-if __name__ == "__main__":
-    main()
