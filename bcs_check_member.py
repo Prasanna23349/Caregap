@@ -133,6 +133,9 @@ def check_eligibility(member):
 
 def build_temp_profile(member, gap_status):
     """Build a profile dict matching the format expected by bcs_step2_matching."""
+    risk = member.get("clinicalRisk", {})
+    sdoh = member.get("sdoh", {})
+    
     return {
         "member": {"memberID": member["id"], "fullName": member["name"]},
         "demographics": {
@@ -153,14 +156,26 @@ def build_temp_profile(member, gap_status):
             "lastMammogramDate": str(member["lastMammogram"]) if member["lastMammogram"] else None,
             "hedisCompliant": gap_status == "CLOSED",
         },
-        "clinical": {k: "PENDING" for k in [
-            "brcaStatus", "familyHistory", "denseBreast", "hrtUse",
-            "bmi", "priorBiopsy", "earlyMenarche",
-        ]},
+        "clinical": {
+            "brcaStatus":          risk.get("brcaStatus",       "PENDING"),
+            "familyHistory":       risk.get("familyHistory",    "PENDING"),
+            "denseBreast":         risk.get("denseBreast",      "PENDING"),
+            "hrtUse":              risk.get("hrtUse",           "PENDING"),
+            "bmi":                 risk.get("bmi",              "PENDING"),
+            "priorBiopsy":         risk.get("priorBiopsy",      "PENDING"),
+            "earlyMenarche":       risk.get("earlyMenarche",    "PENDING"),
+            "firstPregnancyAfter30": risk.get("firstPregnancyAfter30", "PENDING"),
+            "noBreastfeeding":     risk.get("noBreastfeeding",  "PENDING"),
+            "sedentary":           risk.get("sedentary",        "PENDING"),
+            "alcoholUse":          risk.get("alcoholUse",       "PENDING"),
+        },
         "sdoh": {
-            "engagementLevel": member.get("engagementLevel", "PENDING"),
-            "knownBarrier": member.get("knownBarrier", "None"),
-            "transportationAccess": True,
+            "engagementLevel":      sdoh.get("engagementLevel",     member.get("engagementLevel", "PENDING")),
+            "knownBarrier":         sdoh.get("knownBarrier",        member.get("knownBarrier", "None")),
+            "transportationAccess": sdoh.get("transportationAccess", True),
+            "languageBarrier":      sdoh.get("languageBarrier",     False),
+            "fearBarrier":          sdoh.get("fearBarrier",         False),
+            "costBarrier":          sdoh.get("costBarrier",         False),
         },
         "consent": {"optOutOfOutreach": False},
         "care_gap": {"gapStatus": gap_status, "measureID": "BCS"},

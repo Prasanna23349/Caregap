@@ -144,6 +144,16 @@ def match_field(member_val, persona_val):
         return 1.0  # Wildcard — always matches
     if mv in ("pending", "pending — awaiting ehr data", "pending — awaiting member data", ""):
         return 0.3  # Unknown — partial credit
+        
+    # Fuzzy Boolean Equivalency
+    yes_vals = {"true", "yes", "yes (c)", "yes (d)", "regular"}
+    no_vals = {"false", "no", "never", "none", "non-drinker"}
+    
+    if pv in yes_vals and mv in yes_vals:
+        return 1.0
+    if pv in no_vals and mv in no_vals:
+        return 1.0
+        
     if mv == pv:
         return 1.0  # Exact match
     if pv in mv or mv in pv:

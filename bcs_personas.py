@@ -106,6 +106,17 @@ p("P-008","Enrollment Gap — Not Continuously Enrolled","Not Eligible",
   ["Re-evaluate once continuous enrollment confirmed"],"None","None","N/A"),
 
 # ── GROUP 3: NEVER SCREENED ────────────────────────────────────────────────
+p("P-051","Never Screened — Normal Risk","Never Screened",
+  "PASS","FAIL",False, True,False,
+  "Never Screened","Never","None",False,"None",False,
+  "Negative",False,False,False,"Normal",False,False,False,False,False,"None",
+  False,"None",False,
+  False,False,False,False,False,False,
+  "Medium","None","SMS",True,
+  "OPEN","LOW","Never screened + Normal clinical risk profile","Low","2D Mammogram",
+  ["SMS outreach","Send educational video","Provide online scheduling link","Follow up in 30 days"],
+  "SMS","Automated -> Care Coordinator",30),
+
 p("P-009","Never Screened — Very High Risk — BRCA+ with Family History","Never Screened",
   "PASS","FAIL",False, True,False,
   "Never Screened","Never","None",False,"None",False,
