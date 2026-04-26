@@ -27,7 +27,8 @@ CM_POOL = {
 }
 
 def get_open_gap_members():
-    return list(driver.session().run("""
+    with driver.session() as s:
+        return list(s.run("""
         MATCH (m:Member)-[:HAS_CARE_GAP]->(cg:CareGap {measureID:'BCS', gapStatus:'OPEN'})
         MATCH (m)-[:HAS_DEMOGRAPHICS]->(d:Demographics)
         MATCH (m)-[:HAS_RECOMMENDATION]->(rec:CareGapRecommendation)
@@ -169,7 +170,6 @@ def run_step5():
         for row in r2:
             logger.info(f"  {row['cm']}: {row['assignments']} records")
 
-    driver.close()
     log_step_end(logger, 5, "Outreach Workflow", {
         "Outreach records created": len(created),
         "Members skipped (opt-out)": len(skipped),

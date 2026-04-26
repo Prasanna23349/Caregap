@@ -8,6 +8,7 @@ from neo4j import GraphDatabase
 from dotenv import load_dotenv
 from bcs_personas import PERSONAS
 from bcs_logger import get_logger, log_step_start, log_step_end, log_member
+from bcs_config import BCS_CONFIG
 
 load_dotenv()
 logger = get_logger("bcs.step2")
@@ -88,7 +89,7 @@ def determine_group(profile):
     
     age = d.get("age", 0)
     age_pass = arc.get("eligibilityAgeCheck", None)
-    if age_pass == False or age < 42 or age > 74:
+    if age_pass == False or age < BCS_CONFIG["AGE_MIN"] or age > BCS_CONFIG["AGE_MAX"]:
         return "Not Eligible"
 
     # 3. Check gap status from loaded data
@@ -263,6 +264,11 @@ def write_match(member_id, persona_id, score, top3):
     Also update CareGap with inherited output from persona.
     """
     with driver.session() as session:
+        # Remove any stale MATCHED_TO relationships first
+        session.run("""
+            MATCH (m:Member {memberID: $mid})-[r:MATCHED_TO]->() DELETE r
+        """, mid=member_id)
+
         # Create the match relationship
         session.run("""
             MATCH (m:Member {memberID: $mid})
@@ -358,7 +364,6 @@ def run_step2():
                         f"Risk: {str(row['risk']):<12} | "
                         f"Channel: {row['channel']}")
 
-    driver.close()
     log_step_end(logger, 2, "Matching Algorithm", {
         "Members processed": len(results),
         "Matched": matched,

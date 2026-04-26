@@ -174,8 +174,8 @@ SET d.dateOfBirth           = date('1991-07-01'),
     d.administrativeGender  = 'Male',
     d.zipCode               = '02116',
     d.state                 = 'MA',
-    d.employmentStatus      = 'PENDING',
-    d.healthLiteracyLevel   = 'PENDING';
+    d.employmentStatus = 'Retired',
+    d.healthLiteracyLevel = 'High';
 
 MERGE (e:Enrollment {enrollmentID: 'ENR-M0001'})
 SET e.enrollmentStartDate      = date('2026-01-01'),
@@ -233,8 +233,8 @@ SET d.dateOfBirth           = date('1984-09-07'),
     d.administrativeGender  = 'Male',
     d.zipCode               = '22203',
     d.state                 = 'VA',
-    d.employmentStatus      = 'PENDING',
-    d.healthLiteracyLevel   = 'PENDING';
+    d.employmentStatus = 'Employed',
+    d.healthLiteracyLevel = 'Adequate';
 
 MERGE (e:Enrollment {enrollmentID: 'ENR-M0002'})
 SET e.enrollmentStartDate      = date('2026-01-01'),
@@ -282,7 +282,7 @@ SET m.fullName = 'Quinn Fox';
 MERGE (d:Demographics {demoID: 'DEMO-M0003'})
 SET d.dateOfBirth='1978-04-01', d.age=47,
     d.administrativeGender='Male', d.zipCode='22203', d.state='VA',
-    d.employmentStatus='PENDING', d.healthLiteracyLevel='PENDING';
+    d.employmentStatus = 'Self-employed', d.healthLiteracyLevel = 'Marginal';
 
 MERGE (e:Enrollment {enrollmentID: 'ENR-M0003'})
 SET e.enrollmentStartDate=date('2026-01-01'), e.enrollmentEndDate=date('2026-12-31'),
@@ -330,8 +330,8 @@ SET d.dateOfBirth           = date('1956-08-25'),
     d.sexParamClinicalUse   = 'Female-typical',
     d.zipCode               = '94110',
     d.state                 = 'CA',
-    d.employmentStatus      = 'PENDING',
-    d.healthLiteracyLevel   = 'PENDING';
+    d.employmentStatus = 'Employed',
+    d.healthLiteracyLevel = 'Adequate';
 
 MERGE (e:Enrollment {enrollmentID: 'ENR-M0004'})
 SET e.enrollmentStartDate      = date('2026-01-01'),
@@ -376,7 +376,7 @@ MERGE (cg:CareGap {careGapID: 'GAP-BCS-M0004'})
 SET cg.measureID       = 'BCS',
     cg.gapStatus       = 'OPEN',
     cg.gapCreatedDate  = date('2026-01-01'),
-    cg.priorityLevel   = 'PENDING — Awaiting risk score',
+    cg.priorityLevel   = 'UNASSIGNED',
     cg.reason          = 'No BCS mammogram claim found in measurement window';
 
 // SDOH — PENDING
@@ -426,7 +426,7 @@ MERGE (m:Member {memberID: 'M0005'}) SET m.fullName='Rowan Kim';
 MERGE (d:Demographics {demoID: 'DEMO-M0005'})
 SET d.dateOfBirth=date('1967-06-07'), d.age=58,
     d.administrativeGender='Male', d.zipCode='43215', d.state='OH',
-    d.employmentStatus='PENDING', d.healthLiteracyLevel='PENDING';
+    d.employmentStatus = 'Unemployed', d.healthLiteracyLevel = 'High';
 MERGE (e:Enrollment {enrollmentID: 'ENR-M0005'})
 SET e.enrollmentStartDate=date('2026-01-01'), e.enrollmentEndDate=date('2026-12-31'),
     e.continuouslyEnrolled=true, e.measurementYear=2026,
@@ -461,7 +461,7 @@ MERGE (m:Member {memberID: 'M0006'}) SET m.fullName='Jamie Barrett';
 MERGE (d:Demographics {demoID: 'DEMO-M0006'})
 SET d.dateOfBirth=date('1962-11-26'), d.age=63,
     d.administrativeGender='Male', d.zipCode='07030', d.state='NJ',
-    d.employmentStatus='PENDING', d.healthLiteracyLevel='PENDING';
+    d.employmentStatus = 'Employed', d.healthLiteracyLevel = 'Adequate';
 MERGE (e:Enrollment {enrollmentID: 'ENR-M0006'})
 SET e.enrollmentStartDate=date('2026-01-01'), e.enrollmentEndDate=date('2026-12-31'),
     e.continuouslyEnrolled=true, e.measurementYear=2026,
@@ -497,7 +497,7 @@ SET d.dateOfBirth=date('1990-10-13'), d.age=35,
     d.administrativeGender='Female', d.sexAssignedAtBirth='Female',
     d.sexParamClinicalUse='Female-typical',
     d.zipCode='60601', d.state='IL',
-    d.employmentStatus='PENDING', d.healthLiteracyLevel='PENDING';
+    d.employmentStatus = 'Self-employed', d.healthLiteracyLevel = 'Adequate';
 MERGE (e:Enrollment {enrollmentID: 'ENR-M0007'})
 SET e.enrollmentStartDate=date('2026-01-01'), e.enrollmentEndDate=date('2026-12-31'),
     e.continuouslyEnrolled=true, e.measurementYear=2026,
@@ -540,7 +540,7 @@ SET d.dateOfBirth=date('1964-12-20'), d.age=61,
     d.administrativeGender='Female', d.sexAssignedAtBirth='Female',
     d.sexParamClinicalUse='Female-typical',
     d.zipCode='30309', d.state='GA',
-    d.employmentStatus='PENDING', d.healthLiteracyLevel='PENDING';
+    d.employmentStatus = 'Self-employed', d.healthLiteracyLevel = 'Marginal';
 MERGE (e:Enrollment {enrollmentID: 'ENR-M0008'})
 SET e.enrollmentStartDate=date('2026-01-01'), e.enrollmentEndDate=date('2026-12-31'),
     e.continuouslyEnrolled=true, e.measurementYear=2026,
@@ -554,17 +554,17 @@ MERGE (ep:ExclusionProfile {exclusionID: 'EXC-M0008'})
 SET ep.bilateralMastectomy=false, ep.hospice=false, ep.palliativeCare=false,
     ep.frailty=false, ep.genderAffirmingSurgery=false,
     ep.medicare66PlusInSNP_LTC=false, ep.anyExclusionPresent=false;
-MERGE (v:Vitals {vitalsID: 'VIT-M0008'}) SET v.status='PENDING';
-MERGE (ch:ClinicalHistory {historyID: 'CLH-M0008'}) SET ch.status='PENDING';
+MERGE (v:Vitals {vitalsID: 'VIT-M0008'}) SET v.status='UNASSIGNED';
+MERGE (ch:ClinicalHistory {historyID: 'CLH-M0008'}) SET ch.status='UNASSIGNED';
 MERGE (sh:ScreeningHistory {screeningID: 'SCR-M0008'})
 SET sh.lastMammogramDate=null, sh.fallsInLookbackWindow=false,
     sh.screeningStatus='No mammogram claim found';
 MERGE (cg:CareGap {careGapID: 'GAP-BCS-M0008'})
 SET cg.measureID='BCS', cg.gapStatus='OPEN',
     cg.gapCreatedDate=date('2026-01-01'),
-    cg.priorityLevel='PENDING — Awaiting risk score',
+    cg.priorityLevel='UNASSIGNED',
     cg.reason='No BCS mammogram claim found';
-MERGE (sd:SDOH {sdohID: 'SDOH-M0008'}) SET sd.status='PENDING';
+MERGE (sd:SDOH {sdohID: 'SDOH-M0008'}) SET sd.status='UNASSIGNED';
 MERGE (con:Consent {consentID: 'CON-M0008'})
 SET con.optOutOfOutreach=false, con.hipaaConsentOnFile=true;
 MERGE (m:Member {memberID: 'M0008'})
@@ -607,7 +607,7 @@ SET d.dateOfBirth=date('1954-05-27'), d.age=71,
     d.administrativeGender='Female', d.sexAssignedAtBirth='Female',
     d.sexParamClinicalUse='Female-typical',
     d.zipCode='07030', d.state='NJ',
-    d.employmentStatus='PENDING', d.healthLiteracyLevel='PENDING';
+    d.employmentStatus = 'Employed', d.healthLiteracyLevel = 'Low';
 MERGE (e:Enrollment {enrollmentID: 'ENR-M0009'})
 SET e.enrollmentStartDate=date('2026-01-01'), e.enrollmentEndDate=date('2026-12-31'),
     e.continuouslyEnrolled=true, e.measurementYear=2026,
@@ -621,17 +621,17 @@ MERGE (ep:ExclusionProfile {exclusionID: 'EXC-M0009'})
 SET ep.bilateralMastectomy=false, ep.hospice=false, ep.palliativeCare=false,
     ep.frailty=false, ep.genderAffirmingSurgery=false,
     ep.medicare66PlusInSNP_LTC=false, ep.anyExclusionPresent=false;
-MERGE (v:Vitals {vitalsID: 'VIT-M0009'}) SET v.status='PENDING';
-MERGE (ch:ClinicalHistory {historyID: 'CLH-M0009'}) SET ch.status='PENDING';
+MERGE (v:Vitals {vitalsID: 'VIT-M0009'}) SET v.status='UNASSIGNED';
+MERGE (ch:ClinicalHistory {historyID: 'CLH-M0009'}) SET ch.status='UNASSIGNED';
 MERGE (sh:ScreeningHistory {screeningID: 'SCR-M0009'})
 SET sh.lastMammogramDate=null, sh.fallsInLookbackWindow=false,
     sh.screeningStatus='No mammogram claim found — COL gap open (different measure)';
 MERGE (cg:CareGap {careGapID: 'GAP-BCS-M0009'})
 SET cg.measureID='BCS', cg.gapStatus='OPEN',
     cg.gapCreatedDate=date('2026-01-01'),
-    cg.priorityLevel='PENDING — Awaiting risk score',
+    cg.priorityLevel='UNASSIGNED',
     cg.reason='No BCS mammogram claim in window';
-MERGE (sd:SDOH {sdohID: 'SDOH-M0009'}) SET sd.status='PENDING';
+MERGE (sd:SDOH {sdohID: 'SDOH-M0009'}) SET sd.status='UNASSIGNED';
 MERGE (con:Consent {consentID: 'CON-M0009'})
 SET con.optOutOfOutreach=false, con.hipaaConsentOnFile=true;
 MERGE (m:Member {memberID: 'M0009'})
@@ -674,7 +674,7 @@ SET d.dateOfBirth=date('1952-10-04'), d.age=73,
     d.administrativeGender='Female', d.sexAssignedAtBirth='Female',
     d.sexParamClinicalUse='Female-typical',
     d.zipCode='28202', d.state='NC',
-    d.employmentStatus='PENDING', d.healthLiteracyLevel='PENDING';
+    d.employmentStatus = 'Employed', d.healthLiteracyLevel = 'Marginal';
 MERGE (e:Enrollment {enrollmentID: 'ENR-M0010'})
 SET e.enrollmentStartDate=date('2026-01-01'), e.enrollmentEndDate=date('2026-12-31'),
     e.continuouslyEnrolled=true, e.measurementYear=2026,
@@ -688,17 +688,17 @@ MERGE (ep:ExclusionProfile {exclusionID: 'EXC-M0010'})
 SET ep.bilateralMastectomy=false, ep.hospice=false, ep.palliativeCare=false,
     ep.frailty=false, ep.genderAffirmingSurgery=false,
     ep.medicare66PlusInSNP_LTC=false, ep.anyExclusionPresent=false;
-MERGE (v:Vitals {vitalsID: 'VIT-M0010'}) SET v.status='PENDING';
-MERGE (ch:ClinicalHistory {historyID: 'CLH-M0010'}) SET ch.status='PENDING';
+MERGE (v:Vitals {vitalsID: 'VIT-M0010'}) SET v.status='UNASSIGNED';
+MERGE (ch:ClinicalHistory {historyID: 'CLH-M0010'}) SET ch.status='UNASSIGNED';
 MERGE (sh:ScreeningHistory {screeningID: 'SCR-M0010'})
 SET sh.lastMammogramDate=null, sh.fallsInLookbackWindow=false,
     sh.screeningStatus='No mammogram claim found';
 MERGE (cg:CareGap {careGapID: 'GAP-BCS-M0010'})
 SET cg.measureID='BCS', cg.gapStatus='OPEN',
     cg.gapCreatedDate=date('2026-01-01'),
-    cg.priorityLevel='PENDING — Awaiting risk score',
+    cg.priorityLevel='UNASSIGNED',
     cg.reason='No BCS mammogram claim in window';
-MERGE (sd:SDOH {sdohID: 'SDOH-M0010'}) SET sd.status='PENDING';
+MERGE (sd:SDOH {sdohID: 'SDOH-M0010'}) SET sd.status='UNASSIGNED';
 MERGE (con:Consent {consentID: 'CON-M0010'})
 SET con.optOutOfOutreach=false, con.hipaaConsentOnFile=true;
 MERGE (m:Member {memberID: 'M0010'})
@@ -744,7 +744,7 @@ SET d.dateOfBirth=date('1983-11-02'), d.age=42,
     d.administrativeGender='Female', d.sexAssignedAtBirth='Female',
     d.sexParamClinicalUse='Female-typical',
     d.zipCode='43215', d.state='OH',
-    d.employmentStatus='PENDING', d.healthLiteracyLevel='PENDING';
+    d.employmentStatus = 'Retired', d.healthLiteracyLevel = 'Low';
 MERGE (e:Enrollment {enrollmentID: 'ENR-M0011'})
 SET e.enrollmentStartDate=date('2026-01-01'), e.enrollmentEndDate=date('2026-12-31'),
     e.continuouslyEnrolled=true, e.measurementYear=2026,
@@ -765,8 +765,8 @@ MERGE (ep:ExclusionProfile {exclusionID: 'EXC-M0011'})
 SET ep.bilateralMastectomy=false, ep.hospice=false, ep.palliativeCare=false,
     ep.frailty=false, ep.genderAffirmingSurgery=false,
     ep.medicare66PlusInSNP_LTC=false, ep.anyExclusionPresent=false;
-MERGE (v:Vitals {vitalsID: 'VIT-M0011'}) SET v.status='PENDING';
-MERGE (ch:ClinicalHistory {historyID: 'CLH-M0011'}) SET ch.status='PENDING';
+MERGE (v:Vitals {vitalsID: 'VIT-M0011'}) SET v.status='UNASSIGNED';
+MERGE (ch:ClinicalHistory {historyID: 'CLH-M0011'}) SET ch.status='UNASSIGNED';
 
 // Screening History — Mammogram found but OUTSIDE window + age edge case
 MERGE (sh:ScreeningHistory {screeningID: 'SCR-M0011'})
@@ -784,16 +784,16 @@ SET sh.lastMammogramDate       = date('2023-10-04'),
     sh.inNetworkFacility       = true,
     sh.hedisCompliant          = false;
 
-MERGE (cg:CareGap {careGapID: 'GAP-BCS-1'})
+MERGE (cg:CareGap {careGapID: 'GAP-BCS-M0011'})
 SET cg.measureID       = 'BCS',
     cg.gapStatus       = 'OPEN',
     cg.gapCreatedDate  = date('2026-02-10'),
     cg.gapClosedDate   = null,
-    cg.priorityLevel   = 'PENDING — Awaiting risk score',
+    cg.priorityLevel   = 'UNASSIGNED',
     cg.reason          = 'Mammogram 2023-10-04 outside window AND age 39 at test — both rules fail',
     cg.careManagerID   = 'CM-101';
 
-MERGE (sd:SDOH {sdohID: 'SDOH-M0011'}) SET sd.status='PENDING';
+MERGE (sd:SDOH {sdohID: 'SDOH-M0011'}) SET sd.status='UNASSIGNED';
 MERGE (con:Consent {consentID: 'CON-M0011'})
 SET con.optOutOfOutreach=false, con.hipaaConsentOnFile=true;
 
@@ -805,7 +805,7 @@ MERGE (ep:ExclusionProfile {exclusionID: 'EXC-M0011'})
 MERGE (v:Vitals {vitalsID: 'VIT-M0011'})
 MERGE (ch:ClinicalHistory {historyID: 'CLH-M0011'})
 MERGE (sh:ScreeningHistory {screeningID: 'SCR-M0011'})
-MERGE (cg:CareGap {careGapID: 'GAP-BCS-1'})
+MERGE (cg:CareGap {careGapID: 'GAP-BCS-M0011'})
 MERGE (sd:SDOH {sdohID: 'SDOH-M0011'})
 MERGE (con:Consent {consentID: 'CON-M0011'})
 MERGE (bp:BenefitPlan {planID: 'PL-001'})
@@ -837,7 +837,7 @@ MERGE (m:Member {memberID: 'M0012'}) SET m.fullName='Lennox Singh';
 MERGE (d:Demographics {demoID: 'DEMO-M0012'})
 SET d.dateOfBirth=date('1985-03-22'), d.age=41,
     d.administrativeGender='Female', d.sexAssignedAtBirth='Female',
-    d.zipCode='77002', d.state='TX', d.employmentStatus='PENDING';
+    d.zipCode='77002', d.state='TX', d.employmentStatus = 'Unemployed';
 MERGE (e:Enrollment {enrollmentID: 'ENR-M0012'})
 SET e.enrollmentStartDate=date('2026-01-01'), e.enrollmentEndDate=date('2026-12-31'),
     e.continuouslyEnrolled=true, e.measurementYear=2026,
@@ -927,7 +927,7 @@ MERGE (d:Demographics {demoID: 'DEMO-M0015'})
 SET d.dateOfBirth=date('1972-05-02'), d.age=53,
     d.administrativeGender='Female', d.sexAssignedAtBirth='Female',
     d.sexParamClinicalUse='Female-typical',
-    d.zipCode='60601', d.state='IL', d.employmentStatus='PENDING';
+    d.zipCode='60601', d.state='IL', d.employmentStatus = 'Retired';
 MERGE (e:Enrollment {enrollmentID: 'ENR-M0015'})
 SET e.enrollmentStartDate=date('2026-01-01'), e.enrollmentEndDate=date('2026-12-31'),
     e.continuouslyEnrolled=true, e.measurementYear=2026,
@@ -938,8 +938,8 @@ SET arc.eligibilityAgeCheck=true, arc.lookbackAgeCheck=true,
     arc.medicare66PlusInSNP_LTC=false;
 MERGE (ep:ExclusionProfile {exclusionID: 'EXC-M0015'})
 SET ep.bilateralMastectomy=false, ep.anyExclusionPresent=false;
-MERGE (v:Vitals {vitalsID: 'VIT-M0015'}) SET v.status='PENDING';
-MERGE (ch:ClinicalHistory {historyID: 'CLH-M0015'}) SET ch.status='PENDING';
+MERGE (v:Vitals {vitalsID: 'VIT-M0015'}) SET v.status='UNASSIGNED';
+MERGE (ch:ClinicalHistory {historyID: 'CLH-M0015'}) SET ch.status='UNASSIGNED';
 MERGE (sh:ScreeningHistory {screeningID: 'SCR-M0015'})
 SET sh.lastMammogramDate=null, sh.fallsInLookbackWindow=false,
     sh.screeningStatus='No mammogram claim found';
@@ -947,7 +947,7 @@ MERGE (cg:CareGap {careGapID: 'GAP-BCS-M0015'})
 SET cg.measureID='BCS', cg.gapStatus='OPEN',
     cg.gapCreatedDate=date('2026-01-01'),
     cg.priorityLevel='PENDING', cg.reason='No BCS mammogram claim found';
-MERGE (sd:SDOH {sdohID: 'SDOH-M0015'}) SET sd.status='PENDING';
+MERGE (sd:SDOH {sdohID: 'SDOH-M0015'}) SET sd.status='UNASSIGNED';
 MERGE (con:Consent {consentID: 'CON-M0015'}) SET con.optOutOfOutreach=false;
 MERGE (m:Member {memberID: 'M0015'})
 MERGE (d:Demographics {demoID: 'DEMO-M0015'})
@@ -983,7 +983,7 @@ MERGE (m:Member {memberID: 'M0016'}) SET m.fullName='Taylor Lopez';
 MERGE (d:Demographics {demoID: 'DEMO-M0016'})
 SET d.dateOfBirth=date('1997-05-12'), d.age=28,
     d.administrativeGender='Female', d.sexAssignedAtBirth='Female',
-    d.zipCode='28202', d.state='NC', d.employmentStatus='PENDING';
+    d.zipCode='28202', d.state='NC', d.employmentStatus = 'Retired';
 MERGE (e:Enrollment {enrollmentID: 'ENR-M0016'})
 SET e.enrollmentStartDate=date('2026-01-01'), e.enrollmentEndDate=date('2026-12-31'),
     e.continuouslyEnrolled=true, e.measurementYear=2026,
@@ -1017,7 +1017,7 @@ MERGE (d:Demographics {demoID: 'DEMO-M0017'})
 SET d.dateOfBirth=date('1971-06-13'), d.age=54,
     d.administrativeGender='Female', d.sexAssignedAtBirth='Female',
     d.sexParamClinicalUse='Female-typical',
-    d.zipCode='94110', d.state='CA', d.employmentStatus='PENDING';
+    d.zipCode='94110', d.state='CA', d.employmentStatus = 'Unemployed';
 MERGE (e:Enrollment {enrollmentID: 'ENR-M0017'})
 SET e.enrollmentStartDate=date('2026-01-01'), e.enrollmentEndDate=date('2026-12-31'),
     e.continuouslyEnrolled=true, e.measurementYear=2026,
@@ -1028,8 +1028,8 @@ SET arc.eligibilityAgeCheck=true, arc.lookbackAgeCheck=true,
     arc.ageAtLastMammogram=54, arc.medicare66PlusInSNP_LTC=false;
 MERGE (ep:ExclusionProfile {exclusionID: 'EXC-M0017'})
 SET ep.bilateralMastectomy=false, ep.anyExclusionPresent=false;
-MERGE (v:Vitals {vitalsID: 'VIT-M0017'}) SET v.status='PENDING';
-MERGE (ch:ClinicalHistory {historyID: 'CLH-M0017'}) SET ch.status='PENDING';
+MERGE (v:Vitals {vitalsID: 'VIT-M0017'}) SET v.status='UNASSIGNED';
+MERGE (ch:ClinicalHistory {historyID: 'CLH-M0017'}) SET ch.status='UNASSIGNED';
 MERGE (sh:ScreeningHistory {screeningID: 'SCR-M0017'})
 SET sh.lastMammogramDate=date('2026-03-06'),
     sh.mammogramType='Screening', sh.icd10Code='Z00.00',
@@ -1042,7 +1042,7 @@ MERGE (cg:CareGap {careGapID: 'GAP-BCS-M0017'})
 SET cg.measureID='BCS', cg.gapStatus='CLOSED',
     cg.gapClosedDate=date('2026-03-06'),
     cg.reason='Mammogram 2026-03-06 — within lookback window — HEDIS compliant';
-MERGE (sd:SDOH {sdohID: 'SDOH-M0017'}) SET sd.status='PENDING';
+MERGE (sd:SDOH {sdohID: 'SDOH-M0017'}) SET sd.status='UNASSIGNED';
 MERGE (con:Consent {consentID: 'CON-M0017'}) SET con.optOutOfOutreach=false;
 MERGE (m:Member {memberID: 'M0017'})
 MERGE (d:Demographics {demoID: 'DEMO-M0017'})
@@ -1107,7 +1107,7 @@ MERGE (m:Member {memberID: 'M0019'}) SET m.fullName='Jamie Nguyen';
 MERGE (d:Demographics {demoID: 'DEMO-M0019'})
 SET d.dateOfBirth=date('1953-12-02'), d.age=72,
     d.administrativeGender='Female', d.sexAssignedAtBirth='Female',
-    d.zipCode='94110', d.state='CA', d.employmentStatus='PENDING';
+    d.zipCode='94110', d.state='CA', d.employmentStatus = 'Employed';
 MERGE (e:Enrollment {enrollmentID: 'ENR-M0019'})
 SET e.enrollmentStartDate=date('2026-01-01'), e.enrollmentEndDate=date('2026-12-31'),
     e.continuouslyEnrolled=true, e.measurementYear=2026,
@@ -1118,8 +1118,8 @@ SET arc.eligibilityAgeCheck=true, arc.lookbackAgeCheck=true,
     arc.medicare66PlusInSNP_LTC=false;
 MERGE (ep:ExclusionProfile {exclusionID: 'EXC-M0019'})
 SET ep.bilateralMastectomy=false, ep.anyExclusionPresent=false;
-MERGE (v:Vitals {vitalsID: 'VIT-M0019'}) SET v.status='PENDING';
-MERGE (ch:ClinicalHistory {historyID: 'CLH-M0019'}) SET ch.status='PENDING';
+MERGE (v:Vitals {vitalsID: 'VIT-M0019'}) SET v.status='UNASSIGNED';
+MERGE (ch:ClinicalHistory {historyID: 'CLH-M0019'}) SET ch.status='UNASSIGNED';
 MERGE (sh:ScreeningHistory {screeningID: 'SCR-M0019'})
 SET sh.lastMammogramDate=null, sh.fallsInLookbackWindow=false,
     sh.screeningStatus='No mammogram claim found';
@@ -1127,7 +1127,7 @@ MERGE (cg:CareGap {careGapID: 'GAP-BCS-M0019'})
 SET cg.measureID='BCS', cg.gapStatus='OPEN',
     cg.gapCreatedDate=date('2026-01-01'), cg.priorityLevel='PENDING',
     cg.reason='No BCS mammogram claim found';
-MERGE (sd:SDOH {sdohID: 'SDOH-M0019'}) SET sd.status='PENDING';
+MERGE (sd:SDOH {sdohID: 'SDOH-M0019'}) SET sd.status='UNASSIGNED';
 MERGE (con:Consent {consentID: 'CON-M0019'}) SET con.optOutOfOutreach=false;
 MERGE (m:Member {memberID: 'M0019'})
 MERGE (d:Demographics {demoID: 'DEMO-M0019'})
@@ -1293,7 +1293,7 @@ MERGE (d:Demographics {demoID: 'DEMO-M0025'})
 SET d.dateOfBirth=date('1967-09-08'), d.age=58,
     d.administrativeGender='Female', d.sexAssignedAtBirth='Female',
     d.sexParamClinicalUse='Female-typical',
-    d.zipCode='19103', d.state='PA', d.employmentStatus='PENDING';
+    d.zipCode='19103', d.state='PA', d.employmentStatus = 'Employed';
 MERGE (e:Enrollment {enrollmentID: 'ENR-M0025'})
 SET e.enrollmentStartDate=date('2026-01-01'), e.enrollmentEndDate=date('2026-12-31'),
     e.continuouslyEnrolled=true, e.measurementYear=2026,
@@ -1304,8 +1304,8 @@ SET arc.eligibilityAgeCheck=true, arc.lookbackAgeCheck=true,
     arc.ageAtLastMammogram=58, arc.medicare66PlusInSNP_LTC=false;
 MERGE (ep:ExclusionProfile {exclusionID: 'EXC-M0025'})
 SET ep.bilateralMastectomy=false, ep.anyExclusionPresent=false;
-MERGE (v:Vitals {vitalsID: 'VIT-M0025'}) SET v.status='PENDING';
-MERGE (ch:ClinicalHistory {historyID: 'CLH-M0025'}) SET ch.status='PENDING';
+MERGE (v:Vitals {vitalsID: 'VIT-M0025'}) SET v.status='UNASSIGNED';
+MERGE (ch:ClinicalHistory {historyID: 'CLH-M0025'}) SET ch.status='UNASSIGNED';
 // Most recent mammogram: 2026-04-03 (C000051)
 MERGE (sh:ScreeningHistory {screeningID: 'SCR-M0025'})
 SET sh.lastMammogramDate=date('2026-04-03'),
@@ -1318,7 +1318,7 @@ MERGE (cg:CareGap {careGapID: 'GAP-BCS-M0025'})
 SET cg.measureID='BCS', cg.gapStatus='CLOSED',
     cg.gapClosedDate=date('2026-01-18'),
     cg.reason='Mammogram 2026-01-18 within window — HEDIS compliant';
-MERGE (sd:SDOH {sdohID: 'SDOH-M0025'}) SET sd.status='PENDING';
+MERGE (sd:SDOH {sdohID: 'SDOH-M0025'}) SET sd.status='UNASSIGNED';
 MERGE (con:Consent {consentID: 'CON-M0025'}) SET con.optOutOfOutreach=false;
 MERGE (m:Member {memberID: 'M0025'})
 MERGE (d:Demographics {demoID: 'DEMO-M0025'})
@@ -1354,7 +1354,7 @@ MERGE (m:Member {memberID: 'M0026'}) SET m.fullName='Dakota Alvarez';
 MERGE (d:Demographics {demoID: 'DEMO-M0026'})
 SET d.dateOfBirth=date('1950-05-21'), d.age=75,
     d.administrativeGender='Female', d.sexAssignedAtBirth='Female',
-    d.zipCode='07030', d.state='NJ', d.employmentStatus='PENDING';
+    d.zipCode='07030', d.state='NJ', d.employmentStatus = 'Unemployed';
 MERGE (e:Enrollment {enrollmentID: 'ENR-M0026'})
 SET e.enrollmentStartDate=date('2026-01-01'), e.enrollmentEndDate=date('2026-12-31'),
     e.continuouslyEnrolled=true, e.measurementYear=2026,
@@ -1385,7 +1385,7 @@ MERGE (m:Member {memberID: 'M0027'}) SET m.fullName='Jordan Collins';
 MERGE (d:Demographics {demoID: 'DEMO-M0027'})
 SET d.dateOfBirth=date('1964-08-02'), d.age=61,
     d.administrativeGender='Female', d.sexAssignedAtBirth='Female',
-    d.zipCode='77002', d.state='TX', d.employmentStatus='PENDING';
+    d.zipCode='77002', d.state='TX', d.employmentStatus = 'Unemployed';
 MERGE (e:Enrollment {enrollmentID: 'ENR-M0027'})
 SET e.enrollmentStartDate=date('2026-01-01'), e.enrollmentEndDate=date('2026-12-31'),
     e.continuouslyEnrolled=true, e.measurementYear=2026,
@@ -1396,8 +1396,8 @@ SET arc.eligibilityAgeCheck=true, arc.lookbackAgeCheck=true,
     arc.medicare66PlusInSNP_LTC=false;
 MERGE (ep:ExclusionProfile {exclusionID: 'EXC-M0027'})
 SET ep.bilateralMastectomy=false, ep.anyExclusionPresent=false;
-MERGE (v:Vitals {vitalsID: 'VIT-M0027'}) SET v.status='PENDING';
-MERGE (ch:ClinicalHistory {historyID: 'CLH-M0027'}) SET ch.status='PENDING';
+MERGE (v:Vitals {vitalsID: 'VIT-M0027'}) SET v.status='UNASSIGNED';
+MERGE (ch:ClinicalHistory {historyID: 'CLH-M0027'}) SET ch.status='UNASSIGNED';
 MERGE (sh:ScreeningHistory {screeningID: 'SCR-M0027'})
 SET sh.lastMammogramDate=null, sh.fallsInLookbackWindow=false,
     sh.screeningStatus='No mammogram claim found';
@@ -1405,7 +1405,7 @@ MERGE (cg:CareGap {careGapID: 'GAP-BCS-M0027'})
 SET cg.measureID='BCS', cg.gapStatus='OPEN',
     cg.gapCreatedDate=date('2026-01-01'), cg.priorityLevel='PENDING',
     cg.reason='No BCS mammogram claim found';
-MERGE (sd:SDOH {sdohID: 'SDOH-M0027'}) SET sd.status='PENDING';
+MERGE (sd:SDOH {sdohID: 'SDOH-M0027'}) SET sd.status='UNASSIGNED';
 MERGE (con:Consent {consentID: 'CON-M0027'}) SET con.optOutOfOutreach=false;
 MERGE (m:Member {memberID: 'M0027'})
 MERGE (d:Demographics {demoID: 'DEMO-M0027'})
@@ -1440,7 +1440,7 @@ MERGE (m:Member {memberID: 'M0028'}) SET m.fullName='Morgan Kim';
 MERGE (d:Demographics {demoID: 'DEMO-M0028'})
 SET d.dateOfBirth=date('1952-08-07'), d.age=73,
     d.administrativeGender='Female', d.sexAssignedAtBirth='Female',
-    d.zipCode='28202', d.state='NC', d.employmentStatus='PENDING';
+    d.zipCode='28202', d.state='NC', d.employmentStatus = 'Self-employed';
 MERGE (e:Enrollment {enrollmentID: 'ENR-M0028'})
 SET e.enrollmentStartDate=date('2026-01-01'), e.enrollmentEndDate=date('2026-12-31'),
     e.continuouslyEnrolled=true, e.measurementYear=2026,
@@ -1451,8 +1451,8 @@ SET arc.eligibilityAgeCheck=true, arc.lookbackAgeCheck=true,
     arc.medicare66PlusInSNP_LTC=false;
 MERGE (ep:ExclusionProfile {exclusionID: 'EXC-M0028'})
 SET ep.bilateralMastectomy=false, ep.anyExclusionPresent=false;
-MERGE (v:Vitals {vitalsID: 'VIT-M0028'}) SET v.status='PENDING';
-MERGE (ch:ClinicalHistory {historyID: 'CLH-M0028'}) SET ch.status='PENDING';
+MERGE (v:Vitals {vitalsID: 'VIT-M0028'}) SET v.status='UNASSIGNED';
+MERGE (ch:ClinicalHistory {historyID: 'CLH-M0028'}) SET ch.status='UNASSIGNED';
 MERGE (sh:ScreeningHistory {screeningID: 'SCR-M0028'})
 SET sh.lastMammogramDate=null, sh.fallsInLookbackWindow=false,
     sh.screeningStatus='No mammogram claim found';
@@ -1460,7 +1460,7 @@ MERGE (cg:CareGap {careGapID: 'GAP-BCS-M0028'})
 SET cg.measureID='BCS', cg.gapStatus='OPEN',
     cg.gapCreatedDate=date('2026-01-01'), cg.priorityLevel='PENDING',
     cg.reason='No BCS mammogram claim found';
-MERGE (sd:SDOH {sdohID: 'SDOH-M0028'}) SET sd.status='PENDING';
+MERGE (sd:SDOH {sdohID: 'SDOH-M0028'}) SET sd.status='UNASSIGNED';
 MERGE (con:Consent {consentID: 'CON-M0028'}) SET con.optOutOfOutreach=false;
 MERGE (m:Member {memberID: 'M0028'})
 MERGE (d:Demographics {demoID: 'DEMO-M0028'})
@@ -1497,7 +1497,7 @@ MERGE (d:Demographics {demoID: 'DEMO-M0029'})
 SET d.dateOfBirth=date('1976-07-27'), d.age=49,
     d.administrativeGender='Female', d.sexAssignedAtBirth='Female',
     d.sexParamClinicalUse='Female-typical',
-    d.zipCode='33130', d.state='FL', d.employmentStatus='PENDING';
+    d.zipCode='33130', d.state='FL', d.employmentStatus = 'Employed';
 MERGE (e:Enrollment {enrollmentID: 'ENR-M0029'})
 SET e.enrollmentStartDate=date('2026-01-01'), e.enrollmentEndDate=date('2026-12-31'),
     e.continuouslyEnrolled=true, e.measurementYear=2026,
@@ -1509,8 +1509,8 @@ SET arc.eligibilityAgeCheck=true,  // Age 49 — within 42-74 (Hopkins BCS-E)
     arc.medicare66PlusInSNP_LTC=false;
 MERGE (ep:ExclusionProfile {exclusionID: 'EXC-M0029'})
 SET ep.bilateralMastectomy=false, ep.anyExclusionPresent=false;
-MERGE (v:Vitals {vitalsID: 'VIT-M0029'}) SET v.status='PENDING';
-MERGE (ch:ClinicalHistory {historyID: 'CLH-M0029'}) SET ch.status='PENDING';
+MERGE (v:Vitals {vitalsID: 'VIT-M0029'}) SET v.status='UNASSIGNED';
+MERGE (ch:ClinicalHistory {historyID: 'CLH-M0029'}) SET ch.status='UNASSIGNED';
 // Mammogram found: C000060 — CPT 77067, Z00.00, 2026-02-18
 MERGE (sh:ScreeningHistory {screeningID: 'SCR-M0029'})
 SET sh.lastMammogramDate=date('2026-02-18'),
@@ -1523,7 +1523,7 @@ MERGE (cg:CareGap {careGapID: 'GAP-BCS-M0029'})
 SET cg.measureID='BCS', cg.gapStatus='CLOSED',
     cg.gapClosedDate=date('2026-02-18'),
     cg.reason='Mammogram 2026-02-18 — within window — HEDIS compliant';
-MERGE (sd:SDOH {sdohID: 'SDOH-M0029'}) SET sd.status='PENDING';
+MERGE (sd:SDOH {sdohID: 'SDOH-M0029'}) SET sd.status='UNASSIGNED';
 MERGE (con:Consent {consentID: 'CON-M0029'}) SET con.optOutOfOutreach=false;
 MERGE (m:Member {memberID: 'M0029'})
 MERGE (d:Demographics {demoID: 'DEMO-M0029'})
@@ -1717,9 +1717,9 @@ MERGE (sh)-[:DOCUMENTED_IN]->(c);
 // BCS outreach only
 // ============================================================
 
-// Outreach for M0011 — GAP-BCS-1
+// Outreach for M0011 — GAP-BCS-M0011
 MERGE (o:Outreach {outreachID: 'OUT-BCS-1'})
-SET o.careGapID       = 'GAP-BCS-1',
+SET o.careGapID       = 'GAP-BCS-M0011',
     o.memberID        = 'M0011',
     o.careManagerID   = 'CM-101',
     o.channel         = 'Phone',
@@ -1728,7 +1728,7 @@ SET o.careGapID       = 'GAP-BCS-1',
     o.outcome         = 'No Answer',
     o.followupDate    = date('2026-02-26');
 
-MERGE (cg:CareGap {careGapID: 'GAP-BCS-1'})
+MERGE (cg:CareGap {careGapID: 'GAP-BCS-M0011'})
 MERGE (m:Member {memberID: 'M0011'})
 MERGE (cg)-[:TRIGGERED_OUTREACH]->(o)
 MERGE (m)-[:HAS_OUTREACH]->(o);

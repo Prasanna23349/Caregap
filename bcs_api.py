@@ -23,6 +23,7 @@ from neo4j import GraphDatabase
 from dotenv import load_dotenv
 from datetime import date
 from bcs_logger import get_logger
+from bcs_config import BCS_CONFIG
 from bcs_step2_matching import find_best_persona
 from bcs_check_member import (
     compute_age, check_eligibility, build_temp_profile,
@@ -227,8 +228,8 @@ def check_member():
         "hedisRules": {
             "lookbackWindow":    f"{LOOKBACK_START} to {LOOKBACK_END}",
             "validCPTCodes":     sorted(VALID_CPT),
-            "eligibleAgeRange":  "42–74 (as of Dec 31, 2026)",
-            "minAgeAtMammogram": 40,
+            "eligibleAgeRange":  f"{BCS_CONFIG['AGE_MIN']}–{BCS_CONFIG['AGE_MAX']} (as of Dec 31, {BCS_CONFIG['MEASUREMENT_YEAR']})",
+            "minAgeAtMammogram": BCS_CONFIG["LOOKBACK_AGE_MIN"],
         }
     }
 
@@ -420,9 +421,9 @@ def analytics():
     eligible = neo4j_query("""
         MATCH (m:Member)-[:HAS_DEMOGRAPHICS]->(d:Demographics)
         MATCH (m)-[:HAS_CARE_GAP]->(cg:CareGap {measureID:'BCS'})
-        WHERE d.administrativeGender = 'Female' AND d.age >= 42 AND d.age <= 74
+        WHERE d.administrativeGender = 'Female' AND d.age >= $ageMin AND d.age <= $ageMax
         RETURN cg.gapStatus AS status, count(m) AS count
-    """)
+    """, {"ageMin": BCS_CONFIG["AGE_MIN"], "ageMax": BCS_CONFIG["AGE_MAX"]})
 
     open_count   = sum(r["count"] for r in eligible if r["status"] == "OPEN")
     closed_count = sum(r["count"] for r in eligible if r["status"] == "CLOSED")
@@ -433,7 +434,7 @@ def analytics():
     age_bands = neo4j_query("""
         MATCH (m:Member)-[:HAS_DEMOGRAPHICS]->(d:Demographics)
         MATCH (m)-[:HAS_CARE_GAP]->(cg:CareGap {measureID:'BCS'})
-        WHERE d.administrativeGender = 'Female' AND d.age >= 42 AND d.age <= 74
+        WHERE d.administrativeGender = 'Female' AND d.age >= $ageMin AND d.age <= $ageMax
         RETURN
           CASE
             WHEN d.age <= 50 THEN '42-50'
@@ -444,7 +445,7 @@ def analytics():
           cg.gapStatus AS status,
           count(m) AS count
         ORDER BY ageBand, status
-    """)
+    """, {"ageMin": BCS_CONFIG["AGE_MIN"], "ageMax": BCS_CONFIG["AGE_MAX"]})
 
     # Persona distribution
     persona_dist = neo4j_query("""

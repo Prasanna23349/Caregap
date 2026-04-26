@@ -68,7 +68,6 @@ def run_step4():
     else:
         logger.warning(f"⚠️  {fails} check(s) FAILED — fix before generating outreach")
 
-    driver.close()
     log_step_end(logger, 4, "HEDIS Validation", {"Checks Passed": passes, "Checks Failed": fails})
 
 if __name__ == "__main__":

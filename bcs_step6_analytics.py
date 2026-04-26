@@ -6,6 +6,7 @@ import os
 from neo4j import GraphDatabase
 from dotenv import load_dotenv
 from bcs_logger import get_logger, log_step_start, log_step_end
+from bcs_config import BCS_CONFIG
 
 load_dotenv()
 logger = get_logger("bcs.step6")
@@ -15,8 +16,8 @@ driver = GraphDatabase.driver(
     auth=(os.getenv("NEO4J_USERNAME"), os.getenv("NEO4J_PASSWORD"))
 )
 
-def q(session, query):
-    return [dict(r) for r in session.run(query)]
+def q(session, query, **params):
+    return [dict(r) for r in session.run(query, params)]
 
 def run_step6():
     log_step_start(logger, 6, "Population Analytics")
@@ -42,10 +43,10 @@ def run_step6():
         rows = q(s, """
             MATCH (m:Member)-[:HAS_DEMOGRAPHICS]->(d:Demographics)
             MATCH (m)-[:HAS_CARE_GAP]->(cg:CareGap {measureID:'BCS'})
-            WHERE d.administrativeGender = 'Female' AND d.age >= 42 AND d.age <= 74
+            WHERE d.administrativeGender = 'Female' AND d.age >= $ageMin AND d.age <= $ageMax
             RETURN cg.gapStatus AS Status, count(m) AS Count
             ORDER BY Count DESC
-        """)
+        """, ageMin=BCS_CONFIG["AGE_MIN"], ageMax=BCS_CONFIG["AGE_MAX"])
         elig_total = sum(r["Count"] for r in rows)
         closed = next((r["Count"] for r in rows if r["Status"] == "CLOSED"), 0)
         open_  = next((r["Count"] for r in rows if r["Status"] == "OPEN"), 0)
@@ -60,7 +61,7 @@ def run_step6():
         rows = q(s, """
             MATCH (m:Member)-[:HAS_DEMOGRAPHICS]->(d:Demographics)
             MATCH (m)-[:HAS_CARE_GAP]->(cg:CareGap {measureID:'BCS'})
-            WHERE d.administrativeGender = 'Female' AND d.age >= 42 AND d.age <= 74
+            WHERE d.administrativeGender = 'Female' AND d.age >= $ageMin AND d.age <= $ageMax
             RETURN
               CASE
                 WHEN d.age <= 50 THEN '42–50'
@@ -71,7 +72,7 @@ def run_step6():
               cg.gapStatus AS Status,
               count(m) AS Count
             ORDER BY AgeBand, Status
-        """)
+        """, ageMin=BCS_CONFIG["AGE_MIN"], ageMax=BCS_CONFIG["AGE_MAX"])
         bands = {}
         for r in rows:
             b = r["AgeBand"]
@@ -157,7 +158,6 @@ def run_step6():
         else:
             logger.warning("No urgent outreach records found — run Step 5 first")
 
-    driver.close()
     log_step_end(logger, 6, "Population Analytics", {
         "Total members": total,
         "BCS Compliance Rate": f"{rate}%",

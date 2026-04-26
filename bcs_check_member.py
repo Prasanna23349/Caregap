@@ -9,6 +9,7 @@ from dotenv import load_dotenv
 from datetime import date, datetime
 from bcs_personas import PERSONAS
 from bcs_logger import get_logger
+from bcs_config import BCS_CONFIG
 from bcs_step2_matching import (
     determine_group, score_persona, find_best_persona
 )
@@ -20,11 +21,15 @@ driver = GraphDatabase.driver(
     auth=(os.getenv("NEO4J_USERNAME"), os.getenv("NEO4J_PASSWORD"))
 )
 
-LOOKBACK_START  = date(2024, 10, 1)
-LOOKBACK_END    = date(2026, 12, 31)
-PROACTIVE_START = date(2025, 6, 1)
-VALID_CPT       = {"77067", "77066", "77065", "77062", "77061"}
-MEASUREMENT_YEAR_END = date(2026, 12, 31)
+# All constants loaded dynamically from Neo4j QualityMeasure node
+LOOKBACK_START       = BCS_CONFIG["LOOKBACK_START"]
+LOOKBACK_END         = BCS_CONFIG["LOOKBACK_END"]
+PROACTIVE_START      = BCS_CONFIG["PROACTIVE_START"]
+VALID_CPT            = BCS_CONFIG["VALID_CPT"]
+MEASUREMENT_YEAR_END = BCS_CONFIG["MEASUREMENT_YEAR_END"]
+AGE_MIN              = BCS_CONFIG["AGE_MIN"]
+AGE_MAX              = BCS_CONFIG["AGE_MAX"]
+LOOKBACK_AGE_MIN     = BCS_CONFIG["LOOKBACK_AGE_MIN"]
 
 
 # ── Helpers ────────────────────────────────────────────────────────────────
@@ -94,14 +99,14 @@ def check_eligibility(member):
         return "NOT ELIGIBLE", f"Administrative gender is {gender} — BCS applies to females only"
 
     # ── Age check ──
-    if age < 42:
-        return "NOT ELIGIBLE", f"Age {age} — below BCS minimum of 42 (as of Dec 31, {MEASUREMENT_YEAR_END.year})"
-    if age > 74:
-        return "NOT ELIGIBLE", f"Age {age} — above BCS maximum of 74 (as of Dec 31, {MEASUREMENT_YEAR_END.year})"
+    if age < AGE_MIN:
+        return "NOT ELIGIBLE", f"Age {age} — below BCS minimum of {AGE_MIN} (as of Dec 31, {MEASUREMENT_YEAR_END.year})"
+    if age > AGE_MAX:
+        return "NOT ELIGIBLE", f"Age {age} — above BCS maximum of {AGE_MAX} (as of Dec 31, {MEASUREMENT_YEAR_END.year})"
 
     # ── Mammogram check ──
     if mammo is None:
-        return "OPEN", "No mammogram claim found in lookback window (Oct 1, 2024 — Dec 31, 2026)"
+        return "OPEN", f"No mammogram claim found in lookback window ({LOOKBACK_START.strftime('%b %d, %Y')} — {LOOKBACK_END.strftime('%b %d, %Y')})"
 
     # CPT validation
     if cpt not in VALID_CPT:
@@ -114,9 +119,9 @@ def check_eligibility(member):
 
     # Age at mammogram check
     age_at_mammo = mammo.year - dob.year - ((mammo.month, mammo.day) < (dob.month, dob.day))
-    if age_at_mammo < 40:
+    if age_at_mammo < LOOKBACK_AGE_MIN:
         return "OPEN", (f"Member was {age_at_mammo} years old at mammogram on {mammo}. "
-                        f"HEDIS requires age ≥ 40 at time of service.")
+                        f"HEDIS requires age ≥ {LOOKBACK_AGE_MIN} at time of service.")
 
     # Proactive window check
     if mammo >= PROACTIVE_START:
@@ -144,7 +149,7 @@ def build_temp_profile(member, gap_status):
         },
         "enrollment": {"continuouslyEnrolled": member["enrolled"]},
         "age_rule": {
-            "eligibilityAgeCheck": 42 <= member["age"] <= 74,
+            "eligibilityAgeCheck": AGE_MIN <= member["age"] <= AGE_MAX,
             "lookbackAgeCheck": True,
         },
         "exclusion": member["exclusions"],
@@ -250,7 +255,7 @@ def run_check():
     enrolled = ask("Continuously enrolled?", default="yes", choices=["yes", "no"]) == "yes"
 
     age = compute_age(dob)
-    print(f"      → Age as of Dec 31, 2026: {age}")
+    print(f"      → Age as of Dec 31, {MEASUREMENT_YEAR_END.year}: {age}")
 
     # ── Exclusions ──
     print("\n🚫 EXCLUSIONS (press Enter to skip each)")
@@ -325,10 +330,10 @@ def run_check():
         if isinstance(actions, list):
             for a in actions:
                 print(f"     → {str(a).strip()}")
-        print(f"\n  📞 OUTREACH CHANNEL : {persona_out.get('outreachChannel', 'Phone')}")
-        print(f"  ⏱  FOLLOW-UP DAYS   : {persona_out.get('followUpDays', 21)}")
-        print(f"  🚨 PRIORITY         : {persona_out.get('priorityLevel', 'MEDIUM')}")
-        print(f"  ⬆️  ESCALATION PATH  : {persona_out.get('escalationPath', 'PCP')}")
+        print(f"\n  📞 OUTREACH CHANNEL : {persona_out.get('outreachChannel', 'N/A — no persona output')}")
+        print(f"  ⏱  FOLLOW-UP DAYS   : {persona_out.get('followUpDays', 'N/A')}")
+        print(f"  🚨 PRIORITY         : {persona_out.get('priorityLevel', 'N/A — persona output missing')}")
+        print(f"  ⬆️  ESCALATION PATH  : {persona_out.get('escalationPath', 'N/A')}")
 
     # ── Save to Neo4j? ──
     print("\n" + "-" * 62)
@@ -339,7 +344,8 @@ def run_check():
     else:
         print("  ℹ  Not saved — check only.")
 
-    driver.close()
+    # Note: driver.close() removed — only close in __main__ block to avoid
+    # breaking chained pipeline calls
     print("\n" + "=" * 62)
     print("  Done! Re-run the script to check another member.")
     print("=" * 62 + "\n")

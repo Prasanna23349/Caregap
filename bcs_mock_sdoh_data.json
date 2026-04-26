@@ -1,0 +1,14 @@
+[
+  {"memberID": "M0004", "engagementLevel": "Medium", "knownBarrier": "None", "transportationAccess": true, "languageBarrier": false, "fearBarrier": false, "costBarrier": false},
+  {"memberID": "M0008", "engagementLevel": "Medium", "knownBarrier": "None", "transportationAccess": true, "languageBarrier": false, "fearBarrier": false, "costBarrier": false},
+  {"memberID": "M0009", "engagementLevel": "Low", "knownBarrier": "Transportation", "transportationAccess": false, "languageBarrier": false, "fearBarrier": false, "costBarrier": true},
+  {"memberID": "M0010", "engagementLevel": "Low", "knownBarrier": "No Time", "transportationAccess": true, "languageBarrier": false, "fearBarrier": false, "costBarrier": false},
+  {"memberID": "M0011", "engagementLevel": "Medium", "knownBarrier": "None", "transportationAccess": true, "languageBarrier": false, "fearBarrier": false, "costBarrier": false},
+  {"memberID": "M0015", "engagementLevel": "Low", "knownBarrier": "Fear", "transportationAccess": true, "languageBarrier": false, "fearBarrier": true, "costBarrier": false},
+  {"memberID": "M0017", "engagementLevel": "High", "knownBarrier": "None", "transportationAccess": true, "languageBarrier": false, "fearBarrier": false, "costBarrier": false},
+  {"memberID": "M0019", "engagementLevel": "Medium", "knownBarrier": "None", "transportationAccess": true, "languageBarrier": true, "fearBarrier": false, "costBarrier": false},
+  {"memberID": "M0025", "engagementLevel": "High", "knownBarrier": "None", "transportationAccess": true, "languageBarrier": false, "fearBarrier": false, "costBarrier": false},
+  {"memberID": "M0027", "engagementLevel": "Medium", "knownBarrier": "None", "transportationAccess": true, "languageBarrier": false, "fearBarrier": false, "costBarrier": false},
+  {"memberID": "M0028", "engagementLevel": "Low", "knownBarrier": "Fear", "transportationAccess": false, "languageBarrier": false, "fearBarrier": true, "costBarrier": true},
+  {"memberID": "M0029", "engagementLevel": "High", "knownBarrier": "None", "transportationAccess": true, "languageBarrier": false, "fearBarrier": false, "costBarrier": false}
+]

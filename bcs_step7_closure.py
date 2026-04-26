@@ -9,6 +9,8 @@ from dotenv import load_dotenv
 from datetime import date, timedelta
 from bcs_logger import get_logger, log_step_start, log_step_end
 
+from bcs_config import BCS_CONFIG
+
 load_dotenv()
 logger = get_logger("bcs.step7")
 
@@ -17,10 +19,13 @@ driver = GraphDatabase.driver(
     auth=(os.getenv("NEO4J_USERNAME"), os.getenv("NEO4J_PASSWORD"))
 )
 
-VALID_CPT   = {"77067", "77066", "77065", "77062", "77061"}
-WINDOW_START = date(2024, 10, 1)
-WINDOW_END   = date(2026, 12, 31)
-LOOKBACK_AGE_MIN = 40
+# Loaded dynamically from Neo4j QualityMeasure node
+VALID_CPT        = BCS_CONFIG["VALID_CPT"]
+WINDOW_START     = BCS_CONFIG["LOOKBACK_START"]
+WINDOW_END       = BCS_CONFIG["LOOKBACK_END"]
+LOOKBACK_AGE_MIN = BCS_CONFIG["LOOKBACK_AGE_MIN"]
+AGE_MIN          = BCS_CONFIG["AGE_MIN"]
+AGE_MAX          = BCS_CONFIG["AGE_MAX"]
 
 def validate_claim(cpt, service_date_str, age_at_service):
     """Return (valid, reason) for a mammogram claim."""
@@ -139,11 +144,11 @@ def run_step7():
         rows = s.run("""
             MATCH (m:Member)-[:HAS_DEMOGRAPHICS]->(d:Demographics)
             MATCH (m)-[:HAS_CARE_GAP]->(cg:CareGap {measureID:'BCS'})
-            WHERE d.administrativeGender = 'Female' AND d.age >= 42 AND d.age <= 74
+            WHERE d.administrativeGender = 'Female' AND d.age >= $ageMin AND d.age <= $ageMax
             RETURN m.memberID, m.fullName, d.age, cg.gapStatus,
                    cg.gapClosedDate, cg.closingClaimID
             ORDER BY cg.gapStatus, d.age DESC
-        """)
+        """, ageMin=AGE_MIN, ageMax=AGE_MAX)
         for row in rows:
             logger.info(f"  {row['m.memberID']:<10} {str(row['m.fullName']):<22} "
                         f"Age {str(row['d.age']):<4} {row['cg.gapStatus']:<14} "
@@ -186,7 +191,6 @@ def run_step7():
         logger.info(f"  Persona matches:         {r3['c']}")
         logger.info(f"  Persona rulebook size:   {r4['c']} personas")
 
-    driver.close()
     log_step_end(logger, 7, "Gap Closure Tracking", {
         **{f"Gap {k}": v for k, v in final_stats.items()},
         "Proactive alerts": sum(1 for a in approaching if a["proactiveFlag"]),

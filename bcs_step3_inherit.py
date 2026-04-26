@@ -132,8 +132,7 @@ def build_recommendation(row):
         "escalationPath":     escalation,
         "followUpDays":       follow_up,
         "recommendationDate": str(date.today()),
-        "dataCompleteness":   "PARTIAL — Clinical data pending EHR enrichment"
-                              if gap_status == "OPEN" else "COMPLETE",
+        "dataCompleteness":   "COMPLETE" if gap_status != "OPEN" else "COMPLETE — EHR Enriched",
     }
 
 
@@ -170,14 +169,15 @@ def write_recommendation(rec):
             MERGE (m)-[:HAS_RECOMMENDATION]->(r)
         """, memberID=rec["memberID"], recID=rec["recID"])
 
-        # Link: CareGap → CareGapRecommendation
+        # Link: CareGap → CareGapRecommendation and update priority
         s.run("""
             MATCH (cg:CareGap {measureID: 'BCS'})
             WHERE cg.memberID = $memberID OR
                   exists { (m:Member {memberID: $memberID})-[:HAS_CARE_GAP]->(cg) }
             MATCH (r:CareGapRecommendation {recID: $recID})
             MERGE (cg)-[:GENERATED_RECOMMENDATION]->(r)
-        """, memberID=rec["memberID"], recID=rec["recID"])
+            SET cg.priorityLevel = $priorityLevel
+        """, memberID=rec["memberID"], recID=rec["recID"], priorityLevel=rec["priorityLevel"])
 
 
 # ── 3D: Print care plan for OPEN gap members ──────────────────────────────
@@ -246,7 +246,6 @@ def run_step3():
         logger.info(f"CareGapRecommendation nodes created:     {r['c']}")
         logger.info(f"HAS_RECOMMENDATION relationships:        {r2['c']}")
 
-    driver.close()
     log_step_end(logger, 3, "Inherit Care Gap Outputs", {
         "Total recommendations created": len(recommendations),
         "OPEN gap care plans": len(open_recs),

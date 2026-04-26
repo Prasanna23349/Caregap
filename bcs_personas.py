@@ -1,3 +1,4 @@
+
 """
 BCS Ideal Personas — 51 Persona Library
 Hopkins BCS-E | 9-Node Structure Per Persona
